@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NYU Albert Schedule Formatter</title>
+  <title>NYU Albert Course Organizer</title>
   <style>
     :root {
       --purple: #57068c;
       --purple-light: #8900e1;
-      --purple-pale: #f3e8ff;
       --gray-100: #f8f9fa;
       --gray-200: #e9ecef;
       --gray-400: #adb5bd;
@@ -16,7 +15,7 @@
       --gray-800: #343a40;
       --white: #ffffff;
       --radius: 10px;
-      --shadow: 0 2px 12px rgba(87,6,140,0.10);
+      --shadow: 0 2px 10px rgba(87,6,140,0.09);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,42 +30,36 @@
     header {
       background: var(--purple);
       color: var(--white);
-      padding: 18px 32px;
+      padding: 16px 28px;
       display: flex;
       align-items: center;
-      gap: 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
-    header svg { flex-shrink: 0; }
-    header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.3px; }
-    header p { font-size: 0.82rem; opacity: 0.8; margin-top: 2px; }
+    header h1 { font-size: 1.2rem; font-weight: 700; }
+    header p  { font-size: 0.8rem; opacity: 0.75; margin-top: 2px; }
 
-    main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
 
-    /* ── Input section ── */
+    /* ── Input card ── */
     .input-card {
       background: var(--white);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 24px;
-      margin-bottom: 28px;
+      padding: 22px;
+      margin-bottom: 24px;
     }
-    .input-card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 6px; color: var(--purple); }
-    .how-to {
-      font-size: 0.82rem;
-      color: var(--gray-600);
-      margin-bottom: 12px;
-      line-height: 1.6;
-    }
-    .how-to ol { padding-left: 18px; margin-top: 4px; }
+    .input-card h2 { font-size: 0.95rem; font-weight: 600; color: var(--purple); margin-bottom: 6px; }
+    .how-to { font-size: 0.8rem; color: var(--gray-600); line-height: 1.6; margin-bottom: 10px; }
+    .how-to ol { padding-left: 16px; margin-top: 3px; }
 
     textarea {
       width: 100%;
-      height: 160px;
+      height: 180px;
       border: 1.5px solid var(--gray-200);
       border-radius: 8px;
-      padding: 12px;
-      font-size: 0.82rem;
+      padding: 10px 12px;
+      font-size: 0.8rem;
       font-family: 'SFMono-Regular', Consolas, monospace;
       resize: vertical;
       color: var(--gray-800);
@@ -74,285 +67,225 @@
     }
     textarea:focus { outline: none; border-color: var(--purple-light); }
 
-    .btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
     button {
-      padding: 9px 20px;
+      padding: 8px 18px;
       border: none;
       border-radius: 7px;
       cursor: pointer;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 600;
       transition: opacity 0.15s, transform 0.1s;
     }
     button:active { transform: scale(0.97); }
-    .btn-primary { background: var(--purple); color: var(--white); }
-    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary   { background: var(--purple); color: var(--white); }
+    .btn-primary:hover { opacity: 0.87; }
     .btn-secondary { background: var(--gray-200); color: var(--gray-800); }
-    .btn-secondary:hover { background: var(--gray-400); }
+    .btn-secondary:hover { background: #ced4da; }
 
-    /* ── View toggle ── */
-    .view-toggle {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-      align-items: center;
-    }
-    .view-toggle span { font-size: 0.85rem; color: var(--gray-600); margin-right: 4px; }
-    .toggle-btn {
-      padding: 6px 16px;
-      border-radius: 20px;
-      border: 1.5px solid var(--purple);
-      background: transparent;
-      color: var(--purple);
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .toggle-btn.active { background: var(--purple); color: var(--white); }
-
-    /* ── Error / empty state ── */
-    .message {
-      background: var(--white);
-      border-radius: var(--radius);
-      padding: 28px;
-      text-align: center;
+    /* ── Summary bar ── */
+    .summary {
+      font-size: 0.8rem;
       color: var(--gray-600);
+      margin-bottom: 18px;
+      padding: 8px 14px;
+      background: var(--white);
+      border-radius: 8px;
       box-shadow: var(--shadow);
-      font-size: 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
     }
-    .message.error { border-left: 4px solid #dc3545; color: #dc3545; text-align: left; }
+    .summary strong { color: var(--purple); }
 
-    /* ── List View ── */
-    .day-section { margin-bottom: 28px; }
+    /* ── Day sections ── */
+    .day-section { margin-bottom: 26px; }
     .day-header {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
-    .day-label {
+    .day-pill {
       background: var(--purple);
       color: var(--white);
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 700;
       padding: 4px 14px;
       border-radius: 20px;
       letter-spacing: 0.5px;
       text-transform: uppercase;
+      white-space: nowrap;
     }
-    .day-line { flex: 1; height: 1px; background: var(--gray-200); }
+    .day-rule { flex: 1; height: 1px; background: var(--gray-200); }
 
-    .class-list { display: flex; flex-direction: column; gap: 10px; }
-    .class-card {
+    /* ── Class cards ── */
+    .cards { display: flex; flex-direction: column; gap: 8px; }
+
+    .card {
       background: var(--white);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 16px 20px;
+      padding: 14px 16px;
       display: grid;
-      grid-template-columns: 100px 1fr;
-      gap: 0 18px;
-      border-left: 4px solid;
-      align-items: start;
+      grid-template-columns: 88px 1fr auto;
+      gap: 0 14px;
+      align-items: center;
+      border-left: 4px solid var(--purple);
     }
-    .class-time-col {
+    .card.recitation { border-left-color: #0062cc; }
+    .card.lab        { border-left-color: #28a745; }
+    .card.seminar    { border-left-color: #fd7e14; }
+
+    .card-time { text-align: right; }
+    .time-start { font-size: 0.95rem; font-weight: 700; color: var(--gray-800); display: block; }
+    .time-end   { font-size: 0.72rem; color: var(--gray-600); display: block; margin-top: 1px; }
+
+    .card-main { min-width: 0; }
+    .card-top {
       display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      padding-top: 2px;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 3px;
     }
-    .class-start { font-size: 1rem; font-weight: 700; color: var(--gray-800); }
-    .class-end { font-size: 0.78rem; color: var(--gray-600); margin-top: 1px; }
-    .class-info { min-width: 0; }
-    .class-name {
-      font-size: 0.78rem;
+    .course-code {
+      font-size: 0.8rem;
       font-weight: 700;
-      letter-spacing: 0.4px;
       text-transform: uppercase;
-      color: inherit;
-      margin-bottom: 2px;
+      letter-spacing: 0.3px;
+      color: var(--purple);
     }
-    .class-desc { font-size: 0.95rem; font-weight: 600; color: var(--gray-800); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .class-meta { font-size: 0.78rem; color: var(--gray-600); display: flex; flex-wrap: wrap; gap: 10px; }
-    .class-meta span { display: flex; align-items: center; gap: 3px; }
+    .card.recitation .course-code { color: #0062cc; }
+    .card.lab        .course-code { color: #28a745; }
+    .card.seminar    .course-code { color: #fd7e14; }
 
-    /* ── Weekly Calendar View ── */
-    .week-grid {
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow-x: auto;
-    }
-    .week-header {
-      display: grid;
-      background: var(--purple);
-      color: var(--white);
-      border-radius: var(--radius) var(--radius) 0 0;
-      font-size: 0.82rem;
-      font-weight: 700;
-    }
-    .week-body { overflow-x: auto; }
-
-    .cal-grid {
-      display: grid;
-      min-width: 600px;
-    }
-    .cal-time-col {
-      background: var(--gray-100);
-      border-right: 1px solid var(--gray-200);
-      text-align: right;
-      padding: 0 8px;
+    .section-num {
       font-size: 0.72rem;
       color: var(--gray-600);
+      font-weight: 600;
     }
-    .cal-day-header {
-      padding: 10px 8px;
-      text-align: center;
-      letter-spacing: 0.5px;
+    .comp-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
-    .cal-day-col {
-      border-left: 1px solid var(--gray-200);
-      position: relative;
-      min-height: 100%;
+    .comp-lecture    { background: #f3e8ff; color: #57068c; }
+    .comp-recitation { background: #dbeafe; color: #1d4ed8; }
+    .comp-lab        { background: #dcfce7; color: #166534; }
+    .comp-seminar    { background: #ffedd5; color: #9a3412; }
+    .comp-other      { background: var(--gray-200); color: var(--gray-600); }
+
+    .card-meta {
+      font-size: 0.75rem;
+      color: var(--gray-600);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 2px;
     }
-    .cal-row { border-bottom: 1px solid var(--gray-200); }
-    .cal-hour-label {
-      padding: 2px 6px 0;
+    .card-meta span { display: flex; align-items: center; gap: 3px; }
+    .days-tag { font-weight: 600; color: var(--gray-800); }
+
+    .card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+
+    .status-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 12px;
+      white-space: nowrap;
+      letter-spacing: 0.2px;
+    }
+    .status-open     { background: #dcfce7; color: #15803d; }
+    .status-waitlist { background: #fef9c3; color: #854d0e; }
+    .status-closed   { background: #fee2e2; color: #b91c1c; }
+
+    .class-num {
       font-size: 0.68rem;
       color: var(--gray-400);
-      transform: translateY(-8px);
-      display: block;
-      text-align: right;
+      font-family: monospace;
     }
 
-    .cal-event {
-      position: absolute;
-      left: 3px;
-      right: 3px;
-      border-radius: 5px;
-      padding: 4px 6px;
-      overflow: hidden;
-      cursor: default;
-      z-index: 1;
+    /* ── Error / empty ── */
+    .message {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      color: var(--gray-600);
+      box-shadow: var(--shadow);
+      font-size: 0.88rem;
     }
-    .cal-event-name { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; }
-    .cal-event-time { font-size: 0.62rem; opacity: 0.85; }
-    .cal-event-room { font-size: 0.62rem; opacity: 0.75; }
-
-    /* Color palette */
-    .color-0 { border-left-color: #8900e1; color: #8900e1; }
-    .color-1 { border-left-color: #0062cc; color: #0062cc; }
-    .color-2 { border-left-color: #28a745; color: #28a745; }
-    .color-3 { border-left-color: #fd7e14; color: #fd7e14; }
-    .color-4 { border-left-color: #dc3545; color: #dc3545; }
-    .color-5 { border-left-color: #20c997; color: #20c997; }
-    .color-6 { border-left-color: #6f42c1; color: #6f42c1; }
-    .color-7 { border-left-color: #e83e8c; color: #e83e8c; }
-    .color-8 { border-left-color: #17a2b8; color: #17a2b8; }
-
-    .cal-bg-0 { background: rgba(137,0,225,0.12); border-left: 3px solid #8900e1; color: #5a007a; }
-    .cal-bg-1 { background: rgba(0,98,204,0.12); border-left: 3px solid #0062cc; color: #004a9e; }
-    .cal-bg-2 { background: rgba(40,167,69,0.12); border-left: 3px solid #28a745; color: #1a7a32; }
-    .cal-bg-3 { background: rgba(253,126,20,0.12); border-left: 3px solid #fd7e14; color: #c45800; }
-    .cal-bg-4 { background: rgba(220,53,69,0.12); border-left: 3px solid #dc3545; color: #a71d2a; }
-    .cal-bg-5 { background: rgba(32,201,151,0.12); border-left: 3px solid #20c997; color: #12876a; }
-    .cal-bg-6 { background: rgba(111,66,193,0.12); border-left: 3px solid #6f42c1; color: #4a2596; }
-    .cal-bg-7 { background: rgba(232,62,140,0.12); border-left: 3px solid #e83e8c; color: #b0166a; }
-    .cal-bg-8 { background: rgba(23,162,184,0.12); border-left: 3px solid #17a2b8; color: #0e7a8c; }
+    .message.error {
+      border-left: 4px solid #dc3545;
+      color: #dc3545;
+      text-align: left;
+    }
 
     #output { display: none; }
 
-    @media (max-width: 600px) {
-      header { padding: 14px 16px; }
-      main { padding: 16px 12px 40px; }
-      .class-card { grid-template-columns: 80px 1fr; gap: 0 10px; }
+    @media (max-width: 560px) {
+      .card { grid-template-columns: 72px 1fr; }
+      .card-right { display: none; }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-    <rect width="32" height="32" rx="8" fill="white" fill-opacity="0.15"/>
-    <path d="M8 10h16M8 16h10M8 22h13" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
-    <circle cx="24" cy="22" r="4" fill="white" fill-opacity="0.9"/>
-    <path d="M22.5 22l1 1 2-2" stroke="#57068c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
   <div>
-    <h1>NYU Albert Schedule Formatter</h1>
-    <p>Paste your Albert schedule — get it sorted by day &amp; time</p>
+    <h1>NYU Albert Course Organizer</h1>
+    <p>Paste course listings &mdash; get a clean list sorted by day &amp; time</p>
   </div>
 </header>
 
 <main>
   <div class="input-card">
-    <h2>Paste Your Schedule</h2>
+    <h2>Paste Course Listings</h2>
     <div class="how-to">
-      In NYU Albert: <strong>Student Center → My Class Schedule</strong>
-      <ol>
-        <li>Select all the text on the schedule page (<kbd>Ctrl/Cmd + A</kbd>)</li>
-        <li>Copy (<kbd>Ctrl/Cmd + C</kbd>) and paste below</li>
-        <li>Hit <strong>Format Schedule</strong></li>
-      </ol>
+      In NYU Albert, browse a course, then select all &amp; copy the entire page text and paste it below.
+      Repeat for as many courses as you want &mdash; just keep appending.
     </div>
-    <textarea id="rawInput" placeholder="Paste Albert schedule text here…
+    <textarea id="rawInput" placeholder="Paste Albert course listing text here...
 
-Example format:
-Class	Section	Days & Times	Room	Instructor	Start/End Date
-CS-UY 1114	001	MoWeFr 10:00AM - 10:50AM	370 Jay St 325	Smith, J	01/27/2025 - 05/13/2025
-MATH-UA 121	002	TuTh 9:30AM - 10:45AM	Silver 405	Doe, J	01/27/2025 - 05/13/2025"></textarea>
+The app reads the format like:
+  09/02/2026 - 12/14/2026  Mon,Wed  11.00 AM - 12.15 PM  at [room]  with [instructor]"></textarea>
     <div class="btn-row">
-      <button class="btn-primary" onclick="format()">Format Schedule</button>
+      <button class="btn-primary" onclick="run()">Organize Courses</button>
       <button class="btn-secondary" onclick="loadDemo()">Load Demo</button>
       <button class="btn-secondary" onclick="clearAll()">Clear</button>
     </div>
   </div>
 
-  <div id="output">
-    <div class="view-toggle">
-      <span>View:</span>
-      <button class="toggle-btn active" id="btnList" onclick="setView('list')">List</button>
-      <button class="toggle-btn" id="btnCal" onclick="setView('calendar')">Weekly Calendar</button>
-    </div>
-    <div id="listView"></div>
-    <div id="calView" style="display:none"></div>
-  </div>
+  <div id="output"></div>
 </main>
 
 <script>
+// ── Day helpers ──────────────────────────────────────────────────────────────
 const DAY_ORDER = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-const DAY_SHORT = { Monday:'Mon', Tuesday:'Tue', Wednesday:'Wed', Thursday:'Thu', Friday:'Fri', Saturday:'Sat', Sunday:'Sun' };
-const DAY_MAP = {
+const DAY_ABBR_MAP = {
+  mon:'Monday', tue:'Tuesday', wed:'Wednesday', thu:'Thursday',
+  fri:'Friday',  sat:'Saturday', sun:'Sunday',
+  // Albert sometimes uses these too
   mo:'Monday', tu:'Tuesday', we:'Wednesday', th:'Thursday',
-  fr:'Friday', sa:'Saturday', su:'Sunday'
+  fr:'Friday',  sa:'Saturday', su:'Sunday'
 };
 
-// Albert uses Mo Tu We Th Fr Sa Su — parse combined strings like "MoWeFr" or "TuTh"
-function parseDays(str) {
-  if (!str) return [];
-  const days = [];
-  const s = str.toLowerCase();
-  let i = 0;
-  while (i < s.length) {
-    let found = false;
-    // Try 2-char combos in order of length (longest first to avoid 'th' eating 't')
-    for (const code of ['mo','tu','we','th','fr','sa','su']) {
-      if (s.startsWith(code, i)) {
-        const day = DAY_MAP[code];
-        if (!days.includes(day)) days.push(day);
-        i += 2;
-        found = true;
-        break;
-      }
-    }
-    if (!found) i++;
-  }
-  return days;
+function expandDays(str) {
+  // Input like "Mon,Wed" or "Mon" or "Tue,Thu"
+  return str.split(/[,\s]+/)
+    .map(d => DAY_ABBR_MAP[d.toLowerCase().slice(0,3)] || DAY_ABBR_MAP[d.toLowerCase().slice(0,2)] || null)
+    .filter(Boolean);
 }
 
-function parseTime(str) {
-  // e.g. "10:00AM", "9:30AM", "1:00PM"
-  const m = str.trim().match(/^(\d{1,2}):(\d{2})(AM|PM)$/i);
+// ── Time helpers ─────────────────────────────────────────────────────────────
+function parseAlbertTime(str) {
+  // Handles "11.00 AM", "2.00 PM", "12.15 PM"
+  const m = str.trim().match(/^(\d{1,2})\.(\d{2})\s*(AM|PM)$/i);
   if (!m) return null;
   let h = parseInt(m[1]);
   const min = parseInt(m[2]);
@@ -362,276 +295,311 @@ function parseTime(str) {
   return h * 60 + min;
 }
 
-function formatTime12(minutes) {
-  if (minutes == null) return '';
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
+function fmt12(mins) {
+  if (mins == null) return '';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
   const ampm = h >= 12 ? 'PM' : 'AM';
   const h12 = h % 12 === 0 ? 12 : h % 12;
   return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
 }
 
-// Parse a line of tab-separated Albert data
-// Handles both "with description column" and "without" layouts
-function parseLine(line) {
-  const cols = line.split('\t').map(c => c.trim());
-  if (cols.length < 4) return null;
+// ── Parser ───────────────────────────────────────────────────────────────────
+// Matches lines like:
+// 09/02/2026 - 12/14/2026 Mon,Wed 11.00 AM - 12.15 PM at 44 W 4th St (Kaufman Mgt Ctr) Room 2-60 with Bowmaker, Simon
+// 09/02/2026 - 12/14/2026 Mon 2.00 PM - 3.15 PM at 40 W 4th St (Tisch Hall) Room UC11
+const SCHED_RE = /\d{2}\/\d{2}\/\d{4}\s*-\s*\d{2}\/\d{2}\/\d{4}\s+([\w,]+)\s+(\d{1,2}\.\d{2}\s*[AP]M)\s*-\s*(\d{1,2}\.\d{2}\s*[AP]M)\s+at\s+(.+?)(?:\s+with\s+(.+))?$/i;
 
-  // Try to find "Days & Times" column by scanning for pattern like "MoWe 9:00AM - 10:00AM"
-  const dtPattern = /^([A-Za-z]{2,})\s+(\d{1,2}:\d{2}(?:AM|PM))\s*[-–]\s*(\d{1,2}:\d{2}(?:AM|PM))$/i;
-  const tbdPattern = /^TBA$/i;
+function parse(raw) {
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  const sections = [];
 
-  let dayTimeIdx = -1;
-  for (let i = 0; i < cols.length; i++) {
-    if (dtPattern.test(cols[i]) || tbdPattern.test(cols[i])) {
-      dayTimeIdx = i;
-      break;
+  let currentCourse = null;  // { code, name }
+  let block = {};            // accumulates fields for the current section
+
+  function flush() {
+    if (block.schedLine) {
+      const m = block.schedLine.match(SCHED_RE);
+      if (m) {
+        const days      = expandDays(m[1]);
+        const startMin  = parseAlbertTime(m[2]);
+        const endMin    = parseAlbertTime(m[3]);
+        const location  = m[4].trim();
+        const instructor = m[5] ? m[5].trim() : '';
+        if (days.length && startMin != null) {
+          sections.push({
+            courseCode:  block.courseCode || (currentCourse && currentCourse.code) || '',
+            section:     block.section    || '',
+            classNum:    block.classNum   || '',
+            component:   block.component  || '',
+            status:      block.status     || '',
+            days, startMin, endMin, location, instructor
+          });
+        }
+      }
+    }
+    block = {};
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Detect course code line like "ECON-UB 1" at the start of a new course
+    if (/^[A-Z]{2,}-[A-Z]{2}\s+\d+/.test(line) && !line.startsWith('Class#')) {
+      // Could be standalone "ECON-UB 1" repeat lines between sections — capture if it has no other data
+      if (!block.courseCode) {
+        block.courseCode = line.split(/\s+/).slice(0,2).join(' ');
+      }
+      continue;
+    }
+
+    // Course description header: detect pattern "[DEPT-SCHOOL CODE] | N units" in earlier line
+    // Albert puts course code at the top before the description
+    if (/^\s*[A-Z]{2,}-[A-Z]{2}\s+\d+\s*\|\s*\d+\s*units/.test(line)) {
+      const codeMatch = line.match(/([A-Z]{2,}-[A-Z]{2}\s+\d+)/);
+      if (codeMatch) {
+        currentCourse = { code: codeMatch[1] };
+        flush();
+      }
+      continue;
+    }
+
+    if (/^Class#:\s*(\d+)/.test(line)) {
+      flush();
+      block.classNum = line.match(/^Class#:\s*(\d+)/)[1];
+      if (currentCourse) block.courseCode = currentCourse.code;
+      continue;
+    }
+    if (/^Section:\s*(\S+)/.test(line)) {
+      block.section = line.match(/^Section:\s*(\S+)/)[1];
+      continue;
+    }
+    if (/^Class Status:\s*(.+)/.test(line)) {
+      const s = line.match(/^Class Status:\s*(.+)/)[1].trim();
+      block.status = s;
+      continue;
+    }
+    if (/^Component:\s*(.+)/.test(line)) {
+      block.component = line.match(/^Component:\s*(.+)/)[1].trim();
+      continue;
+    }
+
+    // Schedule line
+    if (SCHED_RE.test(line)) {
+      block.schedLine = line;
+      continue;
     }
   }
-  if (dayTimeIdx < 0) return null;
-
-  const dtMatch = cols[dayTimeIdx].match(dtPattern);
-  const days = dtMatch ? parseDays(dtMatch[1]) : [];
-  const startMin = dtMatch ? parseTime(dtMatch[2]) : null;
-  const endMin   = dtMatch ? parseTime(dtMatch[3]) : null;
-
-  // Column to the left of dayTime is typically room, before that section, before that course
-  // Layout A (with description): Class | Desc | Units | Grading | ClassNbr | Section | DayTime | Room | Instructor | Dates
-  // Layout B (compact):          Class | Section | DayTime | Room | Instructor | Dates
-  // Layout C (copy-paste mess):  varies
-  // We detect by dayTimeIdx position
-
-  let courseCode = '', description = '', section = '', room = '', instructor = '';
-
-  if (dayTimeIdx >= 6) {
-    // Layout A
-    courseCode  = cols[0] || '';
-    description = cols[1] || '';
-    section     = cols[5] || '';
-    room        = cols[dayTimeIdx + 1] || '';
-    instructor  = cols[dayTimeIdx + 2] || '';
-  } else if (dayTimeIdx === 2) {
-    // Layout B
-    courseCode = cols[0] || '';
-    section    = cols[1] || '';
-    room       = cols[3] || '';
-    instructor = cols[4] || '';
-  } else {
-    // Fallback: grab what we can
-    courseCode = cols[0] || '';
-    section    = cols[dayTimeIdx - 1] || '';
-    room       = cols[dayTimeIdx + 1] || '';
-    instructor = cols[dayTimeIdx + 2] || '';
-  }
-
-  return { courseCode, description, section, room, instructor, days, startMin, endMin,
-           rawDayTime: cols[dayTimeIdx] };
+  flush();
+  return sections;
 }
 
-let parsedClasses = [];
-let colorMap = {};
-let colorIdx = 0;
-
-function getColor(courseCode) {
-  const key = courseCode.trim().split(' ')[0]; // e.g. "CS-UY"
-  if (!(key in colorMap)) { colorMap[key] = colorIdx++ % 9; }
-  return colorMap[key];
+// ── Render ───────────────────────────────────────────────────────────────────
+function compClass(comp) {
+  if (!comp) return 'other';
+  const c = comp.toLowerCase();
+  if (c.includes('lecture'))    return 'lecture';
+  if (c.includes('recitation')) return 'recitation';
+  if (c.includes('lab'))        return 'lab';
+  if (c.includes('seminar'))    return 'seminar';
+  return 'other';
 }
 
-function format() {
-  const raw = document.getElementById('rawInput').value;
-  if (!raw.trim()) { showMessage('Paste your Albert schedule above and click Format.'); return; }
-
-  colorMap = {};
-  colorIdx = 0;
-  const lines = raw.split('\n');
-  const entries = [];
-
-  for (const line of lines) {
-    if (!line.trim()) continue;
-    // Skip obvious header lines
-    if (/days\s*&?\s*times/i.test(line)) continue;
-    if (/^class\t/i.test(line)) continue;
-    const result = parseLine(line);
-    if (result) entries.push(result);
-  }
-
-  if (!entries.length) {
-    showMessage('Could not find any classes. Make sure you copied the full table from Albert\'s "My Class Schedule" page (including the Days &amp; Times column).', true);
-    return;
-  }
-
-  parsedClasses = entries;
-  renderList(entries);
-  renderCalendar(entries);
-  document.getElementById('output').style.display = 'block';
-}
-
-function showMessage(msg, isError=false) {
-  const out = document.getElementById('output');
-  out.style.display = 'block';
-  document.getElementById('listView').innerHTML = `<div class="message${isError?' error':''}">${msg}</div>`;
-  document.getElementById('calView').innerHTML = '';
-}
-
-// ── List View ──────────────────────────────────────────────────────────────
-function renderList(entries) {
-  // Group by day, then sort by time within each day
-  const byDay = {};
-  for (const e of entries) {
-    for (const day of (e.days.length ? e.days : ['Unknown'])) {
-      if (!byDay[day]) byDay[day] = [];
-      byDay[day].push(e);
-    }
-  }
-
-  const ordered = [...DAY_ORDER, 'Unknown'].filter(d => byDay[d]);
-
-  let html = '';
-  for (const day of ordered) {
-    const classes = byDay[day].sort((a,b) => (a.startMin??9999) - (b.startMin??9999));
-    html += `<div class="day-section">
-      <div class="day-header">
-        <span class="day-label">${day}</span>
-        <div class="day-line"></div>
-      </div>
-      <div class="class-list">`;
-
-    for (const c of classes) {
-      const ci = getColor(c.courseCode);
-      const startStr = c.startMin != null ? formatTime12(c.startMin) : 'TBA';
-      const endStr   = c.endMin   != null ? formatTime12(c.endMin)   : '';
-      const daysStr  = c.days.map(d=>DAY_SHORT[d]||d).join(', ');
-      html += `
-        <div class="class-card color-${ci}">
-          <div class="class-time-col">
-            <span class="class-start">${startStr}</span>
-            ${endStr ? `<span class="class-end">to ${endStr}</span>` : ''}
-          </div>
-          <div class="class-info">
-            <div class="class-name color-${ci}">${esc(c.courseCode)}${c.section ? ' § '+esc(c.section) : ''}</div>
-            ${c.description ? `<div class="class-desc">${esc(c.description)}</div>` : ''}
-            <div class="class-meta">
-              ${c.days.length > 1 ? `<span>📅 ${daysStr}</span>` : ''}
-              ${c.room ? `<span>📍 ${esc(c.room)}</span>` : ''}
-              ${c.instructor ? `<span>👤 ${esc(c.instructor)}</span>` : ''}
-            </div>
-          </div>
-        </div>`;
-    }
-    html += `</div></div>`;
-  }
-
-  document.getElementById('listView').innerHTML = html;
-}
-
-// ── Calendar View ──────────────────────────────────────────────────────────
-function renderCalendar(entries) {
-  const activeDays = DAY_ORDER.filter(d =>
-    entries.some(e => e.days.includes(d))
-  );
-  if (!activeDays.length) { document.getElementById('calView').innerHTML = ''; return; }
-
-  // Find time range
-  const validTimes = entries.flatMap(e => [e.startMin, e.endMin]).filter(t => t != null);
-  const minT = Math.floor(Math.min(...validTimes) / 60) * 60;  // round to hour
-  const maxT = Math.ceil(Math.max(...validTimes) / 60) * 60;
-
-  const SLOT_HEIGHT = 48; // px per hour
-  const TIME_COL_W  = 52;
-  const DAY_COL_W   = Math.max(100, Math.floor((900 - TIME_COL_W) / activeDays.length));
-
-  const totalHours = (maxT - minT) / 60;
-  const gridH = totalHours * SLOT_HEIGHT;
-
-  const colCount = activeDays.length + 1; // +1 for time col
-  const gridTemplateColumns = `${TIME_COL_W}px repeat(${activeDays.length}, ${DAY_COL_W}px)`;
-
-  // Header
-  let headerHTML = `<div style="display:grid;grid-template-columns:${gridTemplateColumns};background:var(--purple);border-radius:var(--radius) var(--radius) 0 0;">
-    <div style="padding:10px 8px;"></div>`;
-  for (const d of activeDays) {
-    headerHTML += `<div class="cal-day-header" style="border-left:1px solid rgba(255,255,255,0.2)">${d}</div>`;
-  }
-  headerHTML += `</div>`;
-
-  // Body: hour rows as background + absolute positioned events
-  let bodyHTML = `<div style="position:relative;overflow-x:auto;">
-    <div style="display:grid;grid-template-columns:${gridTemplateColumns};min-width:${TIME_COL_W + DAY_COL_W * activeDays.length}px;">`;
-
-  // Time labels + horizontal grid lines
-  for (let t = minT; t <= maxT; t += 60) {
-    const label = formatTime12(t);
-    bodyHTML += `<div style="height:${SLOT_HEIGHT}px;border-bottom:1px solid var(--gray-200);background:var(--gray-100);padding:4px 6px 0;text-align:right;">
-      <span style="font-size:0.68rem;color:var(--gray-400);transform:translateY(-8px);display:block;">${label}</span>
-    </div>`;
-    for (let di = 0; di < activeDays.length; di++) {
-      bodyHTML += `<div style="height:${SLOT_HEIGHT}px;border-bottom:1px solid var(--gray-200);border-left:1px solid var(--gray-200);"></div>`;
-    }
-  }
-  bodyHTML += `</div>`;
-
-  // Events overlay — positioned absolutely within columns
-  for (let di = 0; di < activeDays.length; di++) {
-    const day = activeDays[di];
-    const dayEntries = entries.filter(e => e.days.includes(day) && e.startMin != null);
-    const left = TIME_COL_W + di * DAY_COL_W;
-
-    for (const e of dayEntries) {
-      const ci = getColor(e.courseCode);
-      const top  = ((e.startMin - minT) / 60) * SLOT_HEIGHT;
-      const height = Math.max(20, ((e.endMin - e.startMin) / 60) * SLOT_HEIGHT - 4);
-      const label = e.courseCode.length > 18 ? e.courseCode.slice(0,16)+'…' : e.courseCode;
-      bodyHTML += `
-        <div class="cal-event cal-bg-${ci}"
-             style="top:${top}px;height:${height}px;left:${left+3}px;width:${DAY_COL_W-8}px;position:absolute;"
-             title="${esc(e.courseCode)}${e.description?' — '+esc(e.description):''}&#10;${formatTime12(e.startMin)} – ${formatTime12(e.endMin)}${e.room?'&#10;'+esc(e.room):''}">
-          <div class="cal-event-name">${esc(label)}</div>
-          <div class="cal-event-time">${formatTime12(e.startMin)}–${formatTime12(e.endMin)}</div>
-          ${e.room ? `<div class="cal-event-room">${esc(e.room)}</div>` : ''}
-        </div>`;
-    }
-  }
-
-  bodyHTML += `</div>`;
-
-  document.getElementById('calView').innerHTML = `
-    <div class="week-grid" style="overflow:hidden;">
-      ${headerHTML}
-      <div style="position:relative;min-height:${gridH}px;overflow:hidden;">
-        ${bodyHTML}
-      </div>
-    </div>`;
-}
-
-function setView(v) {
-  document.getElementById('listView').style.display = v === 'list' ? 'block' : 'none';
-  document.getElementById('calView').style.display  = v === 'calendar' ? 'block' : 'none';
-  document.getElementById('btnList').classList.toggle('active', v === 'list');
-  document.getElementById('btnCal').classList.toggle('active',  v === 'calendar');
-}
-
-function clearAll() {
-  document.getElementById('rawInput').value = '';
-  document.getElementById('output').style.display = 'none';
-  parsedClasses = [];
-  colorMap = {};
-  colorIdx = 0;
+function statusInfo(s) {
+  if (!s) return { cls: 'status-open', label: 'Open' };
+  const l = s.toLowerCase();
+  if (l.includes('wait')) return { cls: 'status-waitlist', label: s };
+  if (l.includes('closed') || l.includes('full')) return { cls: 'status-closed', label: 'Closed' };
+  return { cls: 'status-open', label: 'Open' };
 }
 
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function shortLocation(loc) {
+  // Shorten "44 W 4th St (Kaufman Mgt Ctr) Room 2-60" → "KMC Room 2-60"
+  const roomMatch = loc.match(/Room\s+(\S+)/i);
+  const parenMatch = loc.match(/\(([^)]+)\)/);
+  if (parenMatch && roomMatch) {
+    // Abbreviate building name to initials
+    const abbr = parenMatch[1].split(/\s+/).map(w => w[0]).join('').toUpperCase();
+    return `${abbr} Rm ${roomMatch[1]}`;
+  }
+  if (roomMatch) return `Rm ${roomMatch[1]}`;
+  return loc.length > 30 ? loc.slice(0,28)+'…' : loc;
+}
+
+function render(sections) {
+  if (!sections.length) {
+    document.getElementById('output').innerHTML =
+      '<div class="message error">No class sections found. Make sure the text includes schedule lines like:<br><code>09/02/2026 - 12/14/2026 Mon,Wed 11.00 AM - 12.15 PM at [room]</code></div>';
+    document.getElementById('output').style.display = 'block';
+    return;
+  }
+
+  // Group by day
+  const byDay = {};
+  for (const s of sections) {
+    for (const day of s.days) {
+      if (!byDay[day]) byDay[day] = [];
+      byDay[day].push(s);
+    }
+  }
+
+  const totalSections = sections.length;
+  const open = sections.filter(s => !s.status.toLowerCase().includes('wait') && !s.status.toLowerCase().includes('closed')).length;
+  const courses = new Set(sections.map(s => s.courseCode)).size;
+
+  let html = `<div class="summary">
+    <span><strong>${totalSections}</strong> sections across <strong>${courses}</strong> course${courses!==1?'s':''}</span>
+    <span><strong style="color:#15803d">${open}</strong> open &nbsp;|&nbsp; <strong style="color:#854d0e">${sections.filter(s=>s.status.toLowerCase().includes('wait')).length}</strong> waitlist &nbsp;|&nbsp; <strong style="color:#b91c1c">${sections.filter(s=>s.status.toLowerCase().includes('closed')||s.status.toLowerCase().includes('full')).length}</strong> closed</span>
+  </div>`;
+
+  for (const day of DAY_ORDER) {
+    if (!byDay[day]) continue;
+    const sorted = byDay[day].sort((a,b) => a.startMin - b.startMin);
+
+    html += `<div class="day-section">
+      <div class="day-header">
+        <span class="day-pill">${day}</span>
+        <div class="day-rule"></div>
+      </div>
+      <div class="cards">`;
+
+    for (const s of sorted) {
+      const cc    = compClass(s.component);
+      const si    = statusInfo(s.status);
+      const allDays = s.days.map(d => d.slice(0,3)).join(', ');
+      const multiDay = s.days.length > 1;
+
+      html += `<div class="card ${cc}">
+        <div class="card-time">
+          <span class="time-start">${fmt12(s.startMin)}</span>
+          <span class="time-end">to ${fmt12(s.endMin)}</span>
+        </div>
+        <div class="card-main">
+          <div class="card-top">
+            <span class="course-code">${esc(s.courseCode)}</span>
+            <span class="section-num">§${esc(s.section)}</span>
+            <span class="comp-badge comp-${cc}">${esc(s.component||'?')}</span>
+          </div>
+          <div class="card-meta">
+            ${multiDay ? `<span class="days-tag">${esc(allDays)}</span>` : ''}
+            ${s.location  ? `<span>&#128205; ${esc(shortLocation(s.location))}</span>` : ''}
+            ${s.instructor? `<span>&#128100; ${esc(s.instructor)}</span>` : ''}
+          </div>
+        </div>
+        <div class="card-right">
+          <span class="status-badge ${si.cls}">${esc(si.label)}</span>
+          ${s.classNum ? `<span class="class-num">#${esc(s.classNum)}</span>` : ''}
+        </div>
+      </div>`;
+    }
+
+    html += `</div></div>`;
+  }
+
+  const out = document.getElementById('output');
+  out.innerHTML = html;
+  out.style.display = 'block';
+}
+
+// ── Main ─────────────────────────────────────────────────────────────────────
+function run() {
+  const raw = document.getElementById('rawInput').value;
+  if (!raw.trim()) {
+    document.getElementById('output').innerHTML = '<div class="message">Paste course text above and click Organize.</div>';
+    document.getElementById('output').style.display = 'block';
+    return;
+  }
+  render(parse(raw));
+}
+
+function clearAll() {
+  document.getElementById('rawInput').value = '';
+  document.getElementById('output').style.display = 'none';
+  document.getElementById('output').innerHTML = '';
+}
+
 function loadDemo() {
-  document.getElementById('rawInput').value =
-`Class\tDescription\tUnits\tGrading\tClass Nbr\tSection\tDays & Times\tRoom\tInstructor\tStart/End Date
-CS-UY 1114\tIntroduction to Programming\t4\tGraded\t12301\t001\tMoWeFr 10:00AM - 10:50AM\t370 Jay St 325\tSmith, J\t01/27/2025 - 05/13/2025
-MATH-UA 121\tCalculus I\t4\tGraded\t23456\t002\tTuTh 9:30AM - 10:45AM\tSilver Center 405\tDoe, J\t01/27/2025 - 05/13/2025
-PHYS-UA 11\tGeneral Physics I\t4\tGraded\t34567\t003\tMoWe 2:00PM - 3:15PM\tMeyer Hall 121\tLee, M\t01/27/2025 - 05/13/2025
-ENG-UY 1001\tEnglish Composition\t4\tGraded\t45678\t001\tTuTh 11:00AM - 12:15PM\tRogers Hall 201\tWang, C\t01/27/2025 - 05/13/2025
-CS-UY 2124\tObject Oriented Programming\t4\tGraded\t56789\t001\tFr 12:00PM - 1:45PM\t370 Jay St 220\tKim, P\t01/27/2025 - 05/13/2025`;
-  format();
+  document.getElementById('rawInput').value = `This course covers basic microeconomic principles including applications of supply and demand analysis; consumer choice; theory of the firm under perfect and imperfect competition; game theory and strategy; and theory and policy issues in market imperfections, such as monopoly and antitrust, externalities and regulation, imperfect information and regulation, and income distribution.
+
+School:
+Leonard N. Stern School of Business
+Term:Fall 2026
+ECON-UB 1 | 4 units
+Class#: 2895
+Session: 1 09/02/2026 - 12/14/2026
+Section: 001
+Class Status: Open
+Grading: Ugrd Stern Graded
+Instruction Mode: In-Person
+Course Location: Washington Square
+Component: Lecture
+
+09/02/2026 - 12/14/2026 Mon,Wed 11.00 AM - 12.15 PM at 44 W 4th St (Kaufman Mgt Ctr) Room 2-60 with Bowmaker, Simon
+
+ECON-UB 1
+Class#: 2900
+Session: 1 09/02/2026 - 12/14/2026
+Section: 002
+Class Status: Open
+Grading: Ugrd Stern Graded
+Instruction Mode: In-Person
+Course Location: Washington Square
+Component: Recitation
+
+09/02/2026 - 12/14/2026 Mon 2.00 PM - 3.15 PM at 40 W 4th St (Tisch Hall) Room UC11
+
+ECON-UB 1
+Class#: 2901
+Session: 1 09/02/2026 - 12/14/2026
+Section: 003
+Class Status: Wait List (0)
+Grading: Ugrd Stern Graded
+Instruction Mode: In-Person
+Course Location: Washington Square
+Component: Recitation
+
+09/02/2026 - 12/14/2026 Mon 3.30 PM - 4.45 PM at 40 W 4th St (Tisch Hall) Room UC05
+
+ECON-UB 1
+Class#: 2902
+Session: 1 09/02/2026 - 12/14/2026
+Section: 004
+Class Status: Open
+Grading: Ugrd Stern Graded
+Instruction Mode: In-Person
+Course Location: Washington Square
+Component: Recitation
+
+09/02/2026 - 12/14/2026 Mon 4.55 PM - 6.10 PM at 40 W 4th St (Tisch Hall) Room UC05
+
+ECON-UB 1
+Class#: 2903
+Session: 1 09/02/2026 - 12/14/2026
+Section: 005
+Class Status: Open
+Grading: Ugrd Stern Graded
+Instruction Mode: In-Person
+Course Location: Washington Square
+Component: Recitation
+
+09/02/2026 - 12/14/2026 Tue 2.00 PM - 3.15 PM at 40 W 4th St (Tisch Hall) Room UC11
+
+ECON-UB 1
+Class#: 2905
+Session: 1 09/02/2026 - 12/14/2026
+Section: 006
+Class Status: Open
+Grading: Ugrd Stern Graded
+Instruction Mode: In-Person
+Course Location: Washington Square
+Component: Recitation
+
+09/02/2026 - 12/14/2026 Tue 3.30 PM - 4.45 PM at 40 W 4th St (Tisch Hall) Room UC11`;
+  run();
 }
 </script>
 </body>
