@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NYU Albert Schedule Formatter</title>
+  <style>
+    :root {
+      --purple: #57068c;
+      --purple-light: #8900e1;
+      --purple-pale: #f3e8ff;
+      --gray-100: #f8f9fa;
+      --gray-200: #e9ecef;
+      --gray-400: #adb5bd;
+      --gray-600: #6c757d;
+      --gray-800: #343a40;
+      --white: #ffffff;
+      --radius: 10px;
+      --shadow: 0 2px 12px rgba(87,6,140,0.10);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--purple);
+      color: var(--white);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    header svg { flex-shrink: 0; }
+    header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.3px; }
+    header p { font-size: 0.82rem; opacity: 0.8; margin-top: 2px; }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+
+    /* ── Input section ── */
+    .input-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+    .input-card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 6px; color: var(--purple); }
+    .how-to {
+      font-size: 0.82rem;
+      color: var(--gray-600);
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+    .how-to ol { padding-left: 18px; margin-top: 4px; }
+
+    textarea {
+      width: 100%;
+      height: 160px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.82rem;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      resize: vertical;
+      color: var(--gray-800);
+      transition: border-color 0.2s;
+    }
+    textarea:focus { outline: none; border-color: var(--purple-light); }
+
+    .btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+    button {
+      padding: 9px 20px;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    button:active { transform: scale(0.97); }
+    .btn-primary { background: var(--purple); color: var(--white); }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-800); }
+    .btn-secondary:hover { background: var(--gray-400); }
+
+    /* ── View toggle ── */
+    .view-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .view-toggle span { font-size: 0.85rem; color: var(--gray-600); margin-right: 4px; }
+    .toggle-btn {
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1.5px solid var(--purple);
+      background: transparent;
+      color: var(--purple);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .toggle-btn.active { background: var(--purple); color: var(--white); }
+
+    /* ── Error / empty state ── */
+    .message {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 28px;
+      text-align: center;
+      color: var(--gray-600);
+      box-shadow: var(--shadow);
+      font-size: 0.9rem;
+    }
+    .message.error { border-left: 4px solid #dc3545; color: #dc3545; text-align: left; }
+
+    /* ── List View ── */
+    .day-section { margin-bottom: 28px; }
+    .day-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .day-label {
+      background: var(--purple);
+      color: var(--white);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .day-line { flex: 1; height: 1px; background: var(--gray-200); }
+
+    .class-list { display: flex; flex-direction: column; gap: 10px; }
+    .class-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 0 18px;
+      border-left: 4px solid;
+      align-items: start;
+    }
+    .class-time-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      padding-top: 2px;
+    }
+    .class-start { font-size: 1rem; font-weight: 700; color: var(--gray-800); }
+    .class-end { font-size: 0.78rem; color: var(--gray-600); margin-top: 1px; }
+    .class-info { min-width: 0; }
+    .class-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: inherit;
+      margin-bottom: 2px;
+    }
+    .class-desc { font-size: 0.95rem; font-weight: 600; color: var(--gray-800); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .class-meta { font-size: 0.78rem; color: var(--gray-600); display: flex; flex-wrap: wrap; gap: 10px; }
+    .class-meta span { display: flex; align-items: center; gap: 3px; }
+
+    /* ── Weekly Calendar View ── */
+    .week-grid {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+    }
+    .week-header {
+      display: grid;
+      background: var(--purple);
+      color: var(--white);
+      border-radius: var(--radius) var(--radius) 0 0;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .week-body { overflow-x: auto; }
+
+    .cal-grid {
+      display: grid;
+      min-width: 600px;
+    }
+    .cal-time-col {
+      background: var(--gray-100);
+      border-right: 1px solid var(--gray-200);
+      text-align: right;
+      padding: 0 8px;
+      font-size: 0.72rem;
+      color: var(--gray-600);
+    }
+    .cal-day-header {
+      padding: 10px 8px;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+    .cal-day-col {
+      border-left: 1px solid var(--gray-200);
+      position: relative;
+      min-height: 100%;
+    }
+    .cal-row { border-bottom: 1px solid var(--gray-200); }
+    .cal-hour-label {
+      padding: 2px 6px 0;
+      font-size: 0.68rem;
+      color: var(--gray-400);
+      transform: translateY(-8px);
+      display: block;
+      text-align: right;
+    }
+
+    .cal-event {
+      position: absolute;
+      left: 3px;
+      right: 3px;
+      border-radius: 5px;
+      padding: 4px 6px;
+      overflow: hidden;
+      cursor: default;
+      z-index: 1;
+    }
+    .cal-event-name { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; }
+    .cal-event-time { font-size: 0.62rem; opacity: 0.85; }
+    .cal-event-room { font-size: 0.62rem; opacity: 0.75; }
+
+    /* Color palette */
+    .color-0 { border-left-color: #8900e1; color: #8900e1; }
+    .color-1 { border-left-color: #0062cc; color: #0062cc; }
+    .color-2 { border-left-color: #28a745; color: #28a745; }
+    .color-3 { border-left-color: #fd7e14; color: #fd7e14; }
+    .color-4 { border-left-color: #dc3545; color: #dc3545; }
+    .color-5 { border-left-color: #20c997; color: #20c997; }
+    .color-6 { border-left-color: #6f42c1; color: #6f42c1; }
+    .color-7 { border-left-color: #e83e8c; color: #e83e8c; }
+    .color-8 { border-left-color: #17a2b8; color: #17a2b8; }
+
+    .cal-bg-0 { background: rgba(137,0,225,0.12); border-left: 3px solid #8900e1; color: #5a007a; }
+    .cal-bg-1 { background: rgba(0,98,204,0.12); border-left: 3px solid #0062cc; color: #004a9e; }
+    .cal-bg-2 { background: rgba(40,167,69,0.12); border-left: 3px solid #28a745; color: #1a7a32; }
+    .cal-bg-3 { background: rgba(253,126,20,0.12); border-left: 3px solid #fd7e14; color: #c45800; }
+    .cal-bg-4 { background: rgba(220,53,69,0.12); border-left: 3px solid #dc3545; color: #a71d2a; }
+    .cal-bg-5 { background: rgba(32,201,151,0.12); border-left: 3px solid #20c997; color: #12876a; }
+    .cal-bg-6 { background: rgba(111,66,193,0.12); border-left: 3px solid #6f42c1; color: #4a2596; }
+    .cal-bg-7 { background: rgba(232,62,140,0.12); border-left: 3px solid #e83e8c; color: #b0166a; }
+    .cal-bg-8 { background: rgba(23,162,184,0.12); border-left: 3px solid #17a2b8; color: #0e7a8c; }
+
+    #output { display: none; }
+
+    @media (max-width: 600px) {
+      header { padding: 14px 16px; }
+      main { padding: 16px 12px 40px; }
+      .class-card { grid-template-columns: 80px 1fr; gap: 0 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <rect width="32" height="32" rx="8" fill="white" fill-opacity="0.15"/>
+    <path d="M8 10h16M8 16h10M8 22h13" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="24" cy="22" r="4" fill="white" fill-opacity="0.9"/>
+    <path d="M22.5 22l1 1 2-2" stroke="#57068c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div>
+    <h1>NYU Albert Schedule Formatter</h1>
+    <p>Paste your Albert schedule — get it sorted by day &amp; time</p>
+  </div>
+</header>
+
+<main>
+  <div class="input-card">
+    <h2>Paste Your Schedule</h2>
+    <div class="how-to">
+      In NYU Albert: <strong>Student Center → My Class Schedule</strong>
+      <ol>
+        <li>Select all the text on the schedule page (<kbd>Ctrl/Cmd + A</kbd>)</li>
+        <li>Copy (<kbd>Ctrl/Cmd + C</kbd>) and paste below</li>
+        <li>Hit <strong>Format Schedule</strong></li>
+      </ol>
+    </div>
+    <textarea id="rawInput" placeholder="Paste Albert schedule text here…
+
+Example format:
+Class	Section	Days & Times	Room	Instructor	Start/End Date
+CS-UY 1114	001	MoWeFr 10:00AM - 10:50AM	370 Jay St 325	Smith, J	01/27/2025 - 05/13/2025
+MATH-UA 121	002	TuTh 9:30AM - 10:45AM	Silver 405	Doe, J	01/27/2025 - 05/13/2025"></textarea>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="format()">Format Schedule</button>
+      <button class="btn-secondary" onclick="loadDemo()">Load Demo</button>
+      <button class="btn-secondary" onclick="clearAll()">Clear</button>
+    </div>
+  </div>
+
+  <div id="output">
+    <div class="view-toggle">
+      <span>View:</span>
+      <button class="toggle-btn active" id="btnList" onclick="setView('list')">List</button>
+      <button class="toggle-btn" id="btnCal" onclick="setView('calendar')">Weekly Calendar</button>
+    </div>
+    <div id="listView"></div>
+    <div id="calView" style="display:none"></div>
+  </div>
+</main>
+
+<script>
+const DAY_ORDER = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const DAY_SHORT = { Monday:'Mon', Tuesday:'Tue', Wednesday:'Wed', Thursday:'Thu', Friday:'Fri', Saturday:'Sat', Sunday:'Sun' };
+const DAY_MAP = {
+  mo:'Monday', tu:'Tuesday', we:'Wednesday', th:'Thursday',
+  fr:'Friday', sa:'Saturday', su:'Sunday'
+};
+
+// Albert uses Mo Tu We Th Fr Sa Su — parse combined strings like "MoWeFr" or "TuTh"
+function parseDays(str) {
+  if (!str) return [];
+  const days = [];
+  const s = str.toLowerCase();
+  let i = 0;
+  while (i < s.length) {
+    let found = false;
+    // Try 2-char combos in order of length (longest first to avoid 'th' eating 't')
+    for (const code of ['mo','tu','we','th','fr','sa','su']) {
+      if (s.startsWith(code, i)) {
+        const day = DAY_MAP[code];
+        if (!days.includes(day)) days.push(day);
+        i += 2;
+        found = true;
+        break;
+      }
+    }
+    if (!found) i++;
+  }
+  return days;
+}
+
+function parseTime(str) {
+  // e.g. "10:00AM", "9:30AM", "1:00PM"
+  const m = str.trim().match(/^(\d{1,2}):(\d{2})(AM|PM)$/i);
+  if (!m) return null;
+  let h = parseInt(m[1]);
+  const min = parseInt(m[2]);
+  const ampm = m[3].toUpperCase();
+  if (ampm === 'PM' && h !== 12) h += 12;
+  if (ampm === 'AM' && h === 12) h = 0;
+  return h * 60 + min;
+}
+
+function formatTime12(minutes) {
+  if (minutes == null) return '';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+}
+
+// Parse a line of tab-separated Albert data
+// Handles both "with description column" and "without" layouts
+function parseLine(line) {
+  const cols = line.split('\t').map(c => c.trim());
+  if (cols.length < 4) return null;
+
+  // Try to find "Days & Times" column by scanning for pattern like "MoWe 9:00AM - 10:00AM"
+  const dtPattern = /^([A-Za-z]{2,})\s+(\d{1,2}:\d{2}(?:AM|PM))\s*[-–]\s*(\d{1,2}:\d{2}(?:AM|PM))$/i;
+  const tbdPattern = /^TBA$/i;
+
+  let dayTimeIdx = -1;
+  for (let i = 0; i < cols.length; i++) {
+    if (dtPattern.test(cols[i]) || tbdPattern.test(cols[i])) {
+      dayTimeIdx = i;
+      break;
+    }
+  }
+  if (dayTimeIdx < 0) return null;
+
+  const dtMatch = cols[dayTimeIdx].match(dtPattern);
+  const days = dtMatch ? parseDays(dtMatch[1]) : [];
+  const startMin = dtMatch ? parseTime(dtMatch[2]) : null;
+  const endMin   = dtMatch ? parseTime(dtMatch[3]) : null;
+
+  // Column to the left of dayTime is typically room, before that section, before that course
+  // Layout A (with description): Class | Desc | Units | Grading | ClassNbr | Section | DayTime | Room | Instructor | Dates
+  // Layout B (compact):          Class | Section | DayTime | Room | Instructor | Dates
+  // Layout C (copy-paste mess):  varies
+  // We detect by dayTimeIdx position
+
+  let courseCode = '', description = '', section = '', room = '', instructor = '';
+
+  if (dayTimeIdx >= 6) {
+    // Layout A
+    courseCode  = cols[0] || '';
+    description = cols[1] || '';
+    section     = cols[5] || '';
+    room        = cols[dayTimeIdx + 1] || '';
+    instructor  = cols[dayTimeIdx + 2] || '';
+  } else if (dayTimeIdx === 2) {
+    // Layout B
+    courseCode = cols[0] || '';
+    section    = cols[1] || '';
+    room       = cols[3] || '';
+    instructor = cols[4] || '';
+  } else {
+    // Fallback: grab what we can
+    courseCode = cols[0] || '';
+    section    = cols[dayTimeIdx - 1] || '';
+    room       = cols[dayTimeIdx + 1] || '';
+    instructor = cols[dayTimeIdx + 2] || '';
+  }
+
+  return { courseCode, description, section, room, instructor, days, startMin, endMin,
+           rawDayTime: cols[dayTimeIdx] };
+}
+
+let parsedClasses = [];
+let colorMap = {};
+let colorIdx = 0;
+
+function getColor(courseCode) {
+  const key = courseCode.trim().split(' ')[0]; // e.g. "CS-UY"
+  if (!(key in colorMap)) { colorMap[key] = colorIdx++ % 9; }
+  return colorMap[key];
+}
+
+function format() {
+  const raw = document.getElementById('rawInput').value;
+  if (!raw.trim()) { showMessage('Paste your Albert schedule above and click Format.'); return; }
+
+  colorMap = {};
+  colorIdx = 0;
+  const lines = raw.split('\n');
+  const entries = [];
+
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    // Skip obvious header lines
+    if (/days\s*&?\s*times/i.test(line)) continue;
+    if (/^class\t/i.test(line)) continue;
+    const result = parseLine(line);
+    if (result) entries.push(result);
+  }
+
+  if (!entries.length) {
+    showMessage('Could not find any classes. Make sure you copied the full table from Albert\'s "My Class Schedule" page (including the Days &amp; Times column).', true);
+    return;
+  }
+
+  parsedClasses = entries;
+  renderList(entries);
+  renderCalendar(entries);
+  document.getElementById('output').style.display = 'block';
+}
+
+function showMessage(msg, isError=false) {
+  const out = document.getElementById('output');
+  out.style.display = 'block';
+  document.getElementById('listView').innerHTML = `<div class="message${isError?' error':''}">${msg}</div>`;
+  document.getElementById('calView').innerHTML = '';
+}
+
+// ── List View ──────────────────────────────────────────────────────────────
+function renderList(entries) {
+  // Group by day, then sort by time within each day
+  const byDay = {};
+  for (const e of entries) {
+    for (const day of (e.days.length ? e.days : ['Unknown'])) {
+      if (!byDay[day]) byDay[day] = [];
+      byDay[day].push(e);
+    }
+  }
+
+  const ordered = [...DAY_ORDER, 'Unknown'].filter(d => byDay[d]);
+
+  let html = '';
+  for (const day of ordered) {
+    const classes = byDay[day].sort((a,b) => (a.startMin??9999) - (b.startMin??9999));
+    html += `<div class="day-section">
+      <div class="day-header">
+        <span class="day-label">${day}</span>
+        <div class="day-line"></div>
+      </div>
+      <div class="class-list">`;
+
+    for (const c of classes) {
+      const ci = getColor(c.courseCode);
+      const startStr = c.startMin != null ? formatTime12(c.startMin) : 'TBA';
+      const endStr   = c.endMin   != null ? formatTime12(c.endMin)   : '';
+      const daysStr  = c.days.map(d=>DAY_SHORT[d]||d).join(', ');
+      html += `
+        <div class="class-card color-${ci}">
+          <div class="class-time-col">
+            <span class="class-start">${startStr}</span>
+            ${endStr ? `<span class="class-end">to ${endStr}</span>` : ''}
+          </div>
+          <div class="class-info">
+            <div class="class-name color-${ci}">${esc(c.courseCode)}${c.section ? ' § '+esc(c.section) : ''}</div>
+            ${c.description ? `<div class="class-desc">${esc(c.description)}</div>` : ''}
+            <div class="class-meta">
+              ${c.days.length > 1 ? `<span>📅 ${daysStr}</span>` : ''}
+              ${c.room ? `<span>📍 ${esc(c.room)}</span>` : ''}
+              ${c.instructor ? `<span>👤 ${esc(c.instructor)}</span>` : ''}
+            </div>
+          </div>
+        </div>`;
+    }
+    html += `</div></div>`;
+  }
+
+  document.getElementById('listView').innerHTML = html;
+}
+
+// ── Calendar View ──────────────────────────────────────────────────────────
+function renderCalendar(entries) {
+  const activeDays = DAY_ORDER.filter(d =>
+    entries.some(e => e.days.includes(d))
+  );
+  if (!activeDays.length) { document.getElementById('calView').innerHTML = ''; return; }
+
+  // Find time range
+  const validTimes = entries.flatMap(e => [e.startMin, e.endMin]).filter(t => t != null);
+  const minT = Math.floor(Math.min(...validTimes) / 60) * 60;  // round to hour
+  const maxT = Math.ceil(Math.max(...validTimes) / 60) * 60;
+
+  const SLOT_HEIGHT = 48; // px per hour
+  const TIME_COL_W  = 52;
+  const DAY_COL_W   = Math.max(100, Math.floor((900 - TIME_COL_W) / activeDays.length));
+
+  const totalHours = (maxT - minT) / 60;
+  const gridH = totalHours * SLOT_HEIGHT;
+
+  const colCount = activeDays.length + 1; // +1 for time col
+  const gridTemplateColumns = `${TIME_COL_W}px repeat(${activeDays.length}, ${DAY_COL_W}px)`;
+
+  // Header
+  let headerHTML = `<div style="display:grid;grid-template-columns:${gridTemplateColumns};background:var(--purple);border-radius:var(--radius) var(--radius) 0 0;">
+    <div style="padding:10px 8px;"></div>`;
+  for (const d of activeDays) {
+    headerHTML += `<div class="cal-day-header" style="border-left:1px solid rgba(255,255,255,0.2)">${d}</div>`;
+  }
+  headerHTML += `</div>`;
+
+  // Body: hour rows as background + absolute positioned events
+  let bodyHTML = `<div style="position:relative;overflow-x:auto;">
+    <div style="display:grid;grid-template-columns:${gridTemplateColumns};min-width:${TIME_COL_W + DAY_COL_W * activeDays.length}px;">`;
+
+  // Time labels + horizontal grid lines
+  for (let t = minT; t <= maxT; t += 60) {
+    const label = formatTime12(t);
+    bodyHTML += `<div style="height:${SLOT_HEIGHT}px;border-bottom:1px solid var(--gray-200);background:var(--gray-100);padding:4px 6px 0;text-align:right;">
+      <span style="font-size:0.68rem;color:var(--gray-400);transform:translateY(-8px);display:block;">${label}</span>
+    </div>`;
+    for (let di = 0; di < activeDays.length; di++) {
+      bodyHTML += `<div style="height:${SLOT_HEIGHT}px;border-bottom:1px solid var(--gray-200);border-left:1px solid var(--gray-200);"></div>`;
+    }
+  }
+  bodyHTML += `</div>`;
+
+  // Events overlay — positioned absolutely within columns
+  for (let di = 0; di < activeDays.length; di++) {
+    const day = activeDays[di];
+    const dayEntries = entries.filter(e => e.days.includes(day) && e.startMin != null);
+    const left = TIME_COL_W + di * DAY_COL_W;
+
+    for (const e of dayEntries) {
+      const ci = getColor(e.courseCode);
+      const top  = ((e.startMin - minT) / 60) * SLOT_HEIGHT;
+      const height = Math.max(20, ((e.endMin - e.startMin) / 60) * SLOT_HEIGHT - 4);
+      const label = e.courseCode.length > 18 ? e.courseCode.slice(0,16)+'…' : e.courseCode;
+      bodyHTML += `
+        <div class="cal-event cal-bg-${ci}"
+             style="top:${top}px;height:${height}px;left:${left+3}px;width:${DAY_COL_W-8}px;position:absolute;"
+             title="${esc(e.courseCode)}${e.description?' — '+esc(e.description):''}&#10;${formatTime12(e.startMin)} – ${formatTime12(e.endMin)}${e.room?'&#10;'+esc(e.room):''}">
+          <div class="cal-event-name">${esc(label)}</div>
+          <div class="cal-event-time">${formatTime12(e.startMin)}–${formatTime12(e.endMin)}</div>
+          ${e.room ? `<div class="cal-event-room">${esc(e.room)}</div>` : ''}
+        </div>`;
+    }
+  }
+
+  bodyHTML += `</div>`;
+
+  document.getElementById('calView').innerHTML = `
+    <div class="week-grid" style="overflow:hidden;">
+      ${headerHTML}
+      <div style="position:relative;min-height:${gridH}px;overflow:hidden;">
+        ${bodyHTML}
+      </div>
+    </div>`;
+}
+
+function setView(v) {
+  document.getElementById('listView').style.display = v === 'list' ? 'block' : 'none';
+  document.getElementById('calView').style.display  = v === 'calendar' ? 'block' : 'none';
+  document.getElementById('btnList').classList.toggle('active', v === 'list');
+  document.getElementById('btnCal').classList.toggle('active',  v === 'calendar');
+}
+
+function clearAll() {
+  document.getElementById('rawInput').value = '';
+  document.getElementById('output').style.display = 'none';
+  parsedClasses = [];
+  colorMap = {};
+  colorIdx = 0;
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function loadDemo() {
+  document.getElementById('rawInput').value =
+`Class\tDescription\tUnits\tGrading\tClass Nbr\tSection\tDays & Times\tRoom\tInstructor\tStart/End Date
+CS-UY 1114\tIntroduction to Programming\t4\tGraded\t12301\t001\tMoWeFr 10:00AM - 10:50AM\t370 Jay St 325\tSmith, J\t01/27/2025 - 05/13/2025
+MATH-UA 121\tCalculus I\t4\tGraded\t23456\t002\tTuTh 9:30AM - 10:45AM\tSilver Center 405\tDoe, J\t01/27/2025 - 05/13/2025
+PHYS-UA 11\tGeneral Physics I\t4\tGraded\t34567\t003\tMoWe 2:00PM - 3:15PM\tMeyer Hall 121\tLee, M\t01/27/2025 - 05/13/2025
+ENG-UY 1001\tEnglish Composition\t4\tGraded\t45678\t001\tTuTh 11:00AM - 12:15PM\tRogers Hall 201\tWang, C\t01/27/2025 - 05/13/2025
+CS-UY 2124\tObject Oriented Programming\t4\tGraded\t56789\t001\tFr 12:00PM - 1:45PM\t370 Jay St 220\tKim, P\t01/27/2025 - 05/13/2025`;
+  format();
+}
+</script>
+</body>
+</html>
