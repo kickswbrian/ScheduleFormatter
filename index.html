@@ -210,6 +210,72 @@
       font-family: monospace;
     }
 
+    /* ── Filter bar ── */
+    .filter-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 5px; min-width: 140px; }
+    .filter-group label { font-size: 0.72rem; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.4px; }
+    .filter-group select {
+      border: 1.5px solid var(--gray-200);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 0.82rem;
+      color: var(--gray-800);
+      background: var(--white);
+      cursor: pointer;
+    }
+    .filter-group select:focus { outline: none; border-color: var(--purple-light); }
+
+    .instructor-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 14px;
+      border: 1.5px solid var(--gray-200);
+      background: var(--white);
+      color: var(--gray-600);
+      cursor: pointer;
+      transition: all 0.12s;
+      user-select: none;
+    }
+    .chip.active {
+      background: var(--purple);
+      border-color: var(--purple);
+      color: var(--white);
+    }
+    .chip:hover:not(.active) { border-color: var(--purple-light); color: var(--purple); }
+
+    .filter-reset {
+      font-size: 0.72rem;
+      color: var(--gray-400);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      font-weight: 600;
+      align-self: flex-end;
+      margin-bottom: 2px;
+      text-decoration: underline;
+    }
+    .filter-reset:hover { color: var(--purple); }
+
+    .match-count {
+      font-size: 0.75rem;
+      color: var(--gray-600);
+      margin-bottom: 14px;
+    }
+    .match-count strong { color: var(--purple); }
+
     /* ── Error / empty ── */
     .message {
       background: var(--white);
@@ -265,26 +331,21 @@ The app reads the format like:
 </main>
 
 <script>
-// ── Day helpers ──────────────────────────────────────────────────────────────
 const DAY_ORDER = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const DAY_ABBR_MAP = {
   mon:'Monday', tue:'Tuesday', wed:'Wednesday', thu:'Thursday',
   fri:'Friday',  sat:'Saturday', sun:'Sunday',
-  // Albert sometimes uses these too
   mo:'Monday', tu:'Tuesday', we:'Wednesday', th:'Thursday',
   fr:'Friday',  sa:'Saturday', su:'Sunday'
 };
 
 function expandDays(str) {
-  // Input like "Mon,Wed" or "Mon" or "Tue,Thu"
   return str.split(/[,\s]+/)
     .map(d => DAY_ABBR_MAP[d.toLowerCase().slice(0,3)] || DAY_ABBR_MAP[d.toLowerCase().slice(0,2)] || null)
     .filter(Boolean);
 }
 
-// ── Time helpers ─────────────────────────────────────────────────────────────
 function parseAlbertTime(str) {
-  // Handles "11.00 AM", "2.00 PM", "12.15 PM"
   const m = str.trim().match(/^(\d{1,2})\.(\d{2})\s*(AM|PM)$/i);
   if (!m) return null;
   let h = parseInt(m[1]);
@@ -304,27 +365,22 @@ function fmt12(mins) {
   return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
 }
 
-// ── Parser ───────────────────────────────────────────────────────────────────
-// Matches lines like:
-// 09/02/2026 - 12/14/2026 Mon,Wed 11.00 AM - 12.15 PM at 44 W 4th St (Kaufman Mgt Ctr) Room 2-60 with Bowmaker, Simon
-// 09/02/2026 - 12/14/2026 Mon 2.00 PM - 3.15 PM at 40 W 4th St (Tisch Hall) Room UC11
 const SCHED_RE = /\d{2}\/\d{2}\/\d{4}\s*-\s*\d{2}\/\d{2}\/\d{4}\s+([\w,]+)\s+(\d{1,2}\.\d{2}\s*[AP]M)\s*-\s*(\d{1,2}\.\d{2}\s*[AP]M)\s+at\s+(.+?)(?:\s+with\s+(.+))?$/i;
 
 function parse(raw) {
   const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
   const sections = [];
-
-  let currentCourse = null;  // { code, name }
-  let block = {};            // accumulates fields for the current section
+  let currentCourse = null;
+  let block = {};
 
   function flush() {
     if (block.schedLine) {
       const m = block.schedLine.match(SCHED_RE);
       if (m) {
-        const days      = expandDays(m[1]);
-        const startMin  = parseAlbertTime(m[2]);
-        const endMin    = parseAlbertTime(m[3]);
-        const location  = m[4].trim();
+        const days       = expandDays(m[1]);
+        const startMin   = parseAlbertTime(m[2]);
+        const endMin     = parseAlbertTime(m[3]);
+        const location   = m[4].trim();
         const instructor = m[5] ? m[5].trim() : '';
         if (days.length && startMin != null) {
           sections.push({
@@ -341,60 +397,121 @@ function parse(raw) {
     block = {};
   }
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    // Detect course code line like "ECON-UB 1" at the start of a new course
-    if (/^[A-Z]{2,}-[A-Z]{2}\s+\d+/.test(line) && !line.startsWith('Class#')) {
-      // Could be standalone "ECON-UB 1" repeat lines between sections — capture if it has no other data
-      if (!block.courseCode) {
-        block.courseCode = line.split(/\s+/).slice(0,2).join(' ');
-      }
-      continue;
-    }
-
-    // Course description header: detect pattern "[DEPT-SCHOOL CODE] | N units" in earlier line
-    // Albert puts course code at the top before the description
+  for (const line of lines) {
     if (/^\s*[A-Z]{2,}-[A-Z]{2}\s+\d+\s*\|\s*\d+\s*units/.test(line)) {
       const codeMatch = line.match(/([A-Z]{2,}-[A-Z]{2}\s+\d+)/);
-      if (codeMatch) {
-        currentCourse = { code: codeMatch[1] };
-        flush();
-      }
+      if (codeMatch) { currentCourse = { code: codeMatch[1] }; flush(); }
       continue;
     }
-
+    if (/^[A-Z]{2,}-[A-Z]{2}\s+\d+/.test(line) && !line.startsWith('Class#')) {
+      if (!block.courseCode) block.courseCode = line.split(/\s+/).slice(0,2).join(' ');
+      continue;
+    }
     if (/^Class#:\s*(\d+)/.test(line)) {
       flush();
       block.classNum = line.match(/^Class#:\s*(\d+)/)[1];
       if (currentCourse) block.courseCode = currentCourse.code;
       continue;
     }
-    if (/^Section:\s*(\S+)/.test(line)) {
-      block.section = line.match(/^Section:\s*(\S+)/)[1];
-      continue;
-    }
-    if (/^Class Status:\s*(.+)/.test(line)) {
-      const s = line.match(/^Class Status:\s*(.+)/)[1].trim();
-      block.status = s;
-      continue;
-    }
-    if (/^Component:\s*(.+)/.test(line)) {
-      block.component = line.match(/^Component:\s*(.+)/)[1].trim();
-      continue;
-    }
-
-    // Schedule line
-    if (SCHED_RE.test(line)) {
-      block.schedLine = line;
-      continue;
-    }
+    if (/^Section:\s*(\S+)/.test(line))     { block.section   = line.match(/^Section:\s*(\S+)/)[1]; continue; }
+    if (/^Class Status:\s*(.+)/.test(line)) { block.status    = line.match(/^Class Status:\s*(.+)/)[1].trim(); continue; }
+    if (/^Component:\s*(.+)/.test(line))    { block.component = line.match(/^Component:\s*(.+)/)[1].trim(); continue; }
+    if (SCHED_RE.test(line))                { block.schedLine = line; continue; }
   }
   flush();
   return sections;
 }
 
-// ── Render ───────────────────────────────────────────────────────────────────
+// ── Filter state ─────────────────────────────────────────────────────────────
+let allSections = [];
+let activeInstructors = new Set(); // empty = show all
+
+function getFilters() {
+  return {
+    startAfter:  parseInt(document.getElementById('fStartAfter').value),
+    endBefore:   parseInt(document.getElementById('fEndBefore').value),
+    instructors: activeInstructors
+  };
+}
+
+function applyFilters() {
+  const f = getFilters();
+  const filtered = allSections.filter(s => {
+    if (s.startMin < f.startAfter) return false;
+    if (s.endMin   > f.endBefore)  return false;
+    if (f.instructors.size > 0 && s.instructor && !f.instructors.has(s.instructor)) return false;
+    return true;
+  });
+  renderSections(filtered, allSections.length);
+}
+
+function toggleInstructor(name) {
+  if (activeInstructors.has(name)) activeInstructors.delete(name);
+  else activeInstructors.add(name);
+  document.querySelectorAll('.chip[data-instructor]').forEach(c => {
+    c.classList.toggle('active', activeInstructors.has(c.dataset.instructor));
+  });
+  applyFilters();
+}
+
+function resetFilters() {
+  document.getElementById('fStartAfter').value = 0;
+  document.getElementById('fEndBefore').value  = 1440;
+  activeInstructors.clear();
+  document.querySelectorAll('.chip[data-instructor]').forEach(c => c.classList.remove('active'));
+  applyFilters();
+}
+
+// ── Time select options ───────────────────────────────────────────────────────
+function timeOptions(selectedVal, mode) {
+  const slots = [];
+  for (let h = 6; h <= 23; h++) {
+    for (const m of [0, 30]) {
+      slots.push(h * 60 + m);
+    }
+  }
+  slots.push(1440); // midnight cap
+
+  const noneVal  = mode === 'start' ? 0    : 1440;
+  const noneLabel = mode === 'start' ? 'Any time' : 'Any time';
+
+  let html = `<option value="${noneVal}"${selectedVal===noneVal?' selected':''}>${noneLabel}</option>`;
+  for (const t of slots) {
+    if (mode === 'start' && t === 1440) continue;
+    if (mode === 'end'   && t === 0)    continue;
+    const sel = selectedVal === t ? ' selected' : '';
+    html += `<option value="${t}"${sel}>${fmt12(t)}</option>`;
+  }
+  return html;
+}
+
+// ── Render filter bar ─────────────────────────────────────────────────────────
+function renderFilterBar(sections) {
+  const instructors = [...new Set(sections.map(s => s.instructor).filter(Boolean))].sort();
+  const hasInstructors = instructors.length > 0;
+
+  const chipsHTML = instructors.map(name =>
+    `<span class="chip" data-instructor="${esc(name)}" onclick="toggleInstructor('${esc(name)}')">${esc(name)}</span>`
+  ).join('');
+
+  return `<div class="filter-card">
+    <div class="filter-group">
+      <label>No earlier than</label>
+      <select id="fStartAfter" onchange="applyFilters()">${timeOptions(0,'start')}</select>
+    </div>
+    <div class="filter-group">
+      <label>No later than</label>
+      <select id="fEndBefore" onchange="applyFilters()">${timeOptions(1440,'end')}</select>
+    </div>
+    ${hasInstructors ? `<div class="filter-group" style="flex:1;min-width:200px;">
+      <label>Instructor (click to filter)</label>
+      <div class="instructor-chips">${chipsHTML}</div>
+    </div>` : ''}
+    <button class="filter-reset" onclick="resetFilters()">Reset filters</button>
+  </div>`;
+}
+
+// ── Render sections ───────────────────────────────────────────────────────────
 function compClass(comp) {
   if (!comp) return 'other';
   const c = comp.toLowerCase();
@@ -408,8 +525,8 @@ function compClass(comp) {
 function statusInfo(s) {
   if (!s) return { cls: 'status-open', label: 'Open' };
   const l = s.toLowerCase();
-  if (l.includes('wait')) return { cls: 'status-waitlist', label: s };
-  if (l.includes('closed') || l.includes('full')) return { cls: 'status-closed', label: 'Closed' };
+  if (l.includes('wait'))                          return { cls: 'status-waitlist', label: s };
+  if (l.includes('closed') || l.includes('full')) return { cls: 'status-closed',   label: 'Closed' };
   return { cls: 'status-open', label: 'Open' };
 }
 
@@ -418,27 +535,24 @@ function esc(s) {
 }
 
 function shortLocation(loc) {
-  // Shorten "44 W 4th St (Kaufman Mgt Ctr) Room 2-60" → "KMC Room 2-60"
-  const roomMatch = loc.match(/Room\s+(\S+)/i);
+  const roomMatch  = loc.match(/Room\s+(\S+)/i);
   const parenMatch = loc.match(/\(([^)]+)\)/);
   if (parenMatch && roomMatch) {
-    // Abbreviate building name to initials
     const abbr = parenMatch[1].split(/\s+/).map(w => w[0]).join('').toUpperCase();
     return `${abbr} Rm ${roomMatch[1]}`;
   }
   if (roomMatch) return `Rm ${roomMatch[1]}`;
-  return loc.length > 30 ? loc.slice(0,28)+'…' : loc;
+  return loc.length > 30 ? loc.slice(0,28)+'...' : loc;
 }
 
-function render(sections) {
+function renderSections(sections, total) {
+  const resultsEl = document.getElementById('results');
+
   if (!sections.length) {
-    document.getElementById('output').innerHTML =
-      '<div class="message error">No class sections found. Make sure the text includes schedule lines like:<br><code>09/02/2026 - 12/14/2026 Mon,Wed 11.00 AM - 12.15 PM at [room]</code></div>';
-    document.getElementById('output').style.display = 'block';
+    resultsEl.innerHTML = '<div class="message">No sections match the current filters.</div>';
     return;
   }
 
-  // Group by day
   const byDay = {};
   for (const s of sections) {
     for (const day of s.days) {
@@ -447,32 +561,24 @@ function render(sections) {
     }
   }
 
-  const totalSections = sections.length;
-  const open = sections.filter(s => !s.status.toLowerCase().includes('wait') && !s.status.toLowerCase().includes('closed')).length;
-  const courses = new Set(sections.map(s => s.courseCode)).size;
+  const showing = sections.length !== total
+    ? `<div class="match-count">Showing <strong>${sections.length}</strong> of ${total} sections</div>`
+    : '';
 
-  let html = `<div class="summary">
-    <span><strong>${totalSections}</strong> sections across <strong>${courses}</strong> course${courses!==1?'s':''}</span>
-    <span><strong style="color:#15803d">${open}</strong> open &nbsp;|&nbsp; <strong style="color:#854d0e">${sections.filter(s=>s.status.toLowerCase().includes('wait')).length}</strong> waitlist &nbsp;|&nbsp; <strong style="color:#b91c1c">${sections.filter(s=>s.status.toLowerCase().includes('closed')||s.status.toLowerCase().includes('full')).length}</strong> closed</span>
-  </div>`;
+  let html = showing;
 
   for (const day of DAY_ORDER) {
     if (!byDay[day]) continue;
     const sorted = byDay[day].sort((a,b) => a.startMin - b.startMin);
 
     html += `<div class="day-section">
-      <div class="day-header">
-        <span class="day-pill">${day}</span>
-        <div class="day-rule"></div>
-      </div>
+      <div class="day-header"><span class="day-pill">${day}</span><div class="day-rule"></div></div>
       <div class="cards">`;
 
     for (const s of sorted) {
-      const cc    = compClass(s.component);
-      const si    = statusInfo(s.status);
+      const cc      = compClass(s.component);
+      const si      = statusInfo(s.status);
       const allDays = s.days.map(d => d.slice(0,3)).join(', ');
-      const multiDay = s.days.length > 1;
-
       html += `<div class="card ${cc}">
         <div class="card-time">
           <span class="time-start">${fmt12(s.startMin)}</span>
@@ -481,13 +587,13 @@ function render(sections) {
         <div class="card-main">
           <div class="card-top">
             <span class="course-code">${esc(s.courseCode)}</span>
-            <span class="section-num">§${esc(s.section)}</span>
+            <span class="section-num">&sect;${esc(s.section)}</span>
             <span class="comp-badge comp-${cc}">${esc(s.component||'?')}</span>
           </div>
           <div class="card-meta">
-            ${multiDay ? `<span class="days-tag">${esc(allDays)}</span>` : ''}
-            ${s.location  ? `<span>&#128205; ${esc(shortLocation(s.location))}</span>` : ''}
-            ${s.instructor? `<span>&#128100; ${esc(s.instructor)}</span>` : ''}
+            ${s.days.length > 1 ? `<span class="days-tag">${esc(allDays)}</span>` : ''}
+            ${s.location   ? `<span>&#128205; ${esc(shortLocation(s.location))}</span>` : ''}
+            ${s.instructor ? `<span>&#128100; ${esc(s.instructor)}</span>` : ''}
           </div>
         </div>
         <div class="card-right">
@@ -496,13 +602,10 @@ function render(sections) {
         </div>
       </div>`;
     }
-
     html += `</div></div>`;
   }
 
-  const out = document.getElementById('output');
-  out.innerHTML = html;
-  out.style.display = 'block';
+  resultsEl.innerHTML = html;
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
@@ -513,91 +616,84 @@ function run() {
     document.getElementById('output').style.display = 'block';
     return;
   }
-  render(parse(raw));
+
+  allSections = parse(raw);
+  activeInstructors.clear();
+
+  if (!allSections.length) {
+    document.getElementById('output').innerHTML =
+      '<div class="message error">No sections found. Make sure the text includes schedule lines like:<br><code>09/02/2026 - 12/14/2026 Mon,Wed 11.00 AM - 12.15 PM at [room]</code></div>';
+    document.getElementById('output').style.display = 'block';
+    return;
+  }
+
+  const open     = allSections.filter(s => !s.status.toLowerCase().includes('wait') && !s.status.toLowerCase().includes('closed')).length;
+  const waitlist = allSections.filter(s => s.status.toLowerCase().includes('wait')).length;
+  const closed   = allSections.filter(s => s.status.toLowerCase().includes('closed') || s.status.toLowerCase().includes('full')).length;
+  const courses  = new Set(allSections.map(s => s.courseCode)).size;
+
+  const summaryHTML = `<div class="summary">
+    <span><strong>${allSections.length}</strong> sections &mdash; <strong>${courses}</strong> course${courses!==1?'s':''}</span>
+    <span><strong style="color:#15803d">${open}</strong> open &nbsp;|&nbsp; <strong style="color:#854d0e">${waitlist}</strong> waitlist &nbsp;|&nbsp; <strong style="color:#b91c1c">${closed}</strong> closed</span>
+  </div>`;
+
+  document.getElementById('output').innerHTML =
+    summaryHTML + renderFilterBar(allSections) + '<div id="results"></div>';
+  document.getElementById('output').style.display = 'block';
+
+  renderSections(allSections, allSections.length);
 }
 
 function clearAll() {
   document.getElementById('rawInput').value = '';
   document.getElementById('output').style.display = 'none';
   document.getElementById('output').innerHTML = '';
+  allSections = [];
+  activeInstructors.clear();
 }
 
 function loadDemo() {
-  document.getElementById('rawInput').value = `This course covers basic microeconomic principles including applications of supply and demand analysis; consumer choice; theory of the firm under perfect and imperfect competition; game theory and strategy; and theory and policy issues in market imperfections, such as monopoly and antitrust, externalities and regulation, imperfect information and regulation, and income distribution.
-
-School:
-Leonard N. Stern School of Business
-Term:Fall 2026
-ECON-UB 1 | 4 units
+  document.getElementById('rawInput').value = `ECON-UB 1 | 4 units
 Class#: 2895
 Session: 1 09/02/2026 - 12/14/2026
 Section: 001
 Class Status: Open
-Grading: Ugrd Stern Graded
-Instruction Mode: In-Person
-Course Location: Washington Square
 Component: Lecture
-
 09/02/2026 - 12/14/2026 Mon,Wed 11.00 AM - 12.15 PM at 44 W 4th St (Kaufman Mgt Ctr) Room 2-60 with Bowmaker, Simon
 
 ECON-UB 1
 Class#: 2900
-Session: 1 09/02/2026 - 12/14/2026
 Section: 002
 Class Status: Open
-Grading: Ugrd Stern Graded
-Instruction Mode: In-Person
-Course Location: Washington Square
 Component: Recitation
-
 09/02/2026 - 12/14/2026 Mon 2.00 PM - 3.15 PM at 40 W 4th St (Tisch Hall) Room UC11
 
 ECON-UB 1
 Class#: 2901
-Session: 1 09/02/2026 - 12/14/2026
 Section: 003
 Class Status: Wait List (0)
-Grading: Ugrd Stern Graded
-Instruction Mode: In-Person
-Course Location: Washington Square
 Component: Recitation
-
 09/02/2026 - 12/14/2026 Mon 3.30 PM - 4.45 PM at 40 W 4th St (Tisch Hall) Room UC05
 
 ECON-UB 1
 Class#: 2902
-Session: 1 09/02/2026 - 12/14/2026
 Section: 004
 Class Status: Open
-Grading: Ugrd Stern Graded
-Instruction Mode: In-Person
-Course Location: Washington Square
 Component: Recitation
-
 09/02/2026 - 12/14/2026 Mon 4.55 PM - 6.10 PM at 40 W 4th St (Tisch Hall) Room UC05
 
 ECON-UB 1
 Class#: 2903
-Session: 1 09/02/2026 - 12/14/2026
 Section: 005
 Class Status: Open
-Grading: Ugrd Stern Graded
-Instruction Mode: In-Person
-Course Location: Washington Square
 Component: Recitation
-
 09/02/2026 - 12/14/2026 Tue 2.00 PM - 3.15 PM at 40 W 4th St (Tisch Hall) Room UC11
 
 ECON-UB 1
 Class#: 2905
-Session: 1 09/02/2026 - 12/14/2026
 Section: 006
 Class Status: Open
-Grading: Ugrd Stern Graded
-Instruction Mode: In-Person
-Course Location: Washington Square
 Component: Recitation
-
 09/02/2026 - 12/14/2026 Tue 3.30 PM - 4.45 PM at 40 W 4th St (Tisch Hall) Room UC11`;
   run();
 }
