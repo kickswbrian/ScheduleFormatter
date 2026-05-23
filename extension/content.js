@@ -5,6 +5,16 @@ if (existing) {
   return;
 }
 
+// Gather text from this frame + any same-origin child iframes
+function gatherText() {
+  var text = document.body.innerText || '';
+  var frames = document.querySelectorAll('iframe');
+  for (var i = 0; i < frames.length; i++) {
+    try { text += '\n' + frames[i].contentDocument.body.innerText; } catch(e) {}
+  }
+  return text;
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 var DAY_ORDER = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 var DAY_MAP = {
@@ -167,8 +177,13 @@ function timeOptions(val, mode) {
 }
 
 // ── State & filter logic ──────────────────────────────────────────────────────
-var allSections = parse(document.body.innerText);
+var rawText = gatherText();
+var allSections = parse(rawText);
 var activeInstructors = {};
+
+// If this frame has no sections and isn't the top frame, bail out silently
+// so only the frame with actual data shows the modal
+if (allSections.length === 0 && window !== window.top) return;
 
 function applyFilters() {
   var s0 = parseInt(document.getElementById('nf-start').value);
