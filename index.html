@@ -299,6 +299,13 @@
     .bm-btn { display: inline-block; background: var(--purple); color: var(--white); padding: 8px 16px; border-radius: 7px; font-size: 0.85rem; font-weight: 700; text-decoration: none; cursor: grab; user-select: none; }
     .bm-hint { font-size: 0.73rem; color: var(--gray-400); margin-top: 8px; line-height: 1.5; }
 
+    .ext-section { border-top: 1px solid var(--gray-200); margin-top: 16px; padding-top: 14px; }
+    .ext-section h3 { font-size: 0.88rem; font-weight: 700; color: var(--purple); margin-bottom: 6px; }
+    .ext-steps { font-size: 0.78rem; color: var(--gray-600); padding-left: 18px; line-height: 1.9; }
+    .ext-steps li { margin-bottom: 1px; }
+    .ext-steps code { background: var(--gray-100); border: 1px solid var(--gray-200); border-radius: 4px; padding: 1px 5px; font-size: 0.75rem; }
+    .ext-note { font-size: 0.72rem; color: var(--gray-400); margin-top: 8px; }
+
     @media (max-width: 560px) {
       .card { grid-template-columns: 72px 1fr; }
       .card-right { display: none; }
@@ -330,10 +337,16 @@ The app reads the format like:
       <button class="btn-secondary" onclick="loadDemo()">Load Demo</button>
       <button class="btn-secondary" onclick="clearAll()">Clear</button>
     </div>
-    <div class="bm-section">
-      <p><strong>Skip copy-paste</strong> &mdash; use directly on Albert:</p>
-      <a id="bm-link" class="bm-btn" href="#">&#128279; Albert Organizer</a>
-      <p class="bm-hint">Drag this to your bookmarks bar. Then click it on any Albert course listing page &mdash; the formatted list pops up instantly.</p>
+    <div class="ext-section">
+      <h3>&#9889; Use directly on Albert (Chrome Extension)</h3>
+      <ol class="ext-steps">
+        <li>Download the <strong>extension</strong> folder that came with this file</li>
+        <li>Open Chrome and go to <code>chrome://extensions</code></li>
+        <li>Turn on <strong>Developer mode</strong> (top-right toggle)</li>
+        <li>Click <strong>Load unpacked</strong> and select the <code>extension</code> folder</li>
+        <li>Navigate to any Albert course listing &mdash; click the <strong>NYU icon</strong> in your toolbar</li>
+      </ol>
+      <p class="ext-note">The overlay pops up instantly with filters &mdash; no copy-paste needed.</p>
     </div>
   </div>
 
