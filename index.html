@@ -294,6 +294,11 @@
 
     #output { display: none; }
 
+    .bm-section { border-top: 1px solid var(--gray-200); margin-top: 16px; padding-top: 14px; }
+    .bm-section p { font-size: 0.78rem; color: var(--gray-600); margin-bottom: 8px; }
+    .bm-btn { display: inline-block; background: var(--purple); color: var(--white); padding: 8px 16px; border-radius: 7px; font-size: 0.85rem; font-weight: 700; text-decoration: none; cursor: grab; user-select: none; }
+    .bm-hint { font-size: 0.73rem; color: var(--gray-400); margin-top: 8px; line-height: 1.5; }
+
     @media (max-width: 560px) {
       .card { grid-template-columns: 72px 1fr; }
       .card-right { display: none; }
@@ -324,6 +329,11 @@ The app reads the format like:
       <button class="btn-primary" onclick="run()">Organize Courses</button>
       <button class="btn-secondary" onclick="loadDemo()">Load Demo</button>
       <button class="btn-secondary" onclick="clearAll()">Clear</button>
+    </div>
+    <div class="bm-section">
+      <p><strong>Skip copy-paste</strong> &mdash; use directly on Albert:</p>
+      <a id="bm-link" class="bm-btn" href="#">&#128279; Albert Organizer</a>
+      <p class="bm-hint">Drag this to your bookmarks bar. Then click it on any Albert course listing page &mdash; the formatted list pops up instantly.</p>
     </div>
   </div>
 
@@ -651,6 +661,81 @@ function clearAll() {
   allSections = [];
   activeInstructors.clear();
 }
+
+// ── Bookmarklet ───────────────────────────────────────────────────────────────
+function nyuFmtBookmarklet() {
+  var modal = document.getElementById('__nyu-fmt-modal');
+  if (modal) { modal.style.display = modal.style.display === 'none' ? 'flex' : 'none'; return; }
+  var DAY_ORDER = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  var DAY_MAP = {mon:'Monday',tue:'Tuesday',wed:'Wednesday',thu:'Thursday',fri:'Friday',sat:'Saturday',sun:'Sunday',mo:'Monday',tu:'Tuesday',we:'Wednesday',th:'Thursday',fr:'Friday',sa:'Saturday',su:'Sunday'};
+  function expandDays(s) { return s.split(/[,\s]+/).map(function(d){return DAY_MAP[d.toLowerCase().slice(0,3)]||DAY_MAP[d.toLowerCase().slice(0,2)]||null;}).filter(Boolean); }
+  function pt(s) { var m=s.trim().match(/^(\d{1,2})\.(\d{2})\s*(AM|PM)$/i); if(!m)return null; var h=parseInt(m[1]),mn=parseInt(m[2]),ap=m[3].toUpperCase(); if(ap==='PM'&&h!==12)h+=12; if(ap==='AM'&&h===12)h=0; return h*60+mn; }
+  function fmt(t) { if(t==null)return''; var h=Math.floor(t/60),m=t%60,ap=h>=12?'PM':'AM',h12=h%12||12; return h12+':'+(m<10?'0':'')+m+' '+ap; }
+  var RE=/\d{2}\/\d{2}\/\d{4}\s*-\s*\d{2}\/\d{2}\/\d{4}\s+([\w,]+)\s+(\d{1,2}\.\d{2}\s*[AP]M)\s*-\s*(\d{1,2}\.\d{2}\s*[AP]M)\s+at\s+(.+?)(?:\s+with\s+(.+))?$/i;
+  function parse(raw) {
+    var lines=raw.split('\n'),secs=[],cur=null,blk={};
+    function flush(){if(!blk.sched)return;var m=blk.sched.match(RE);if(!m){blk={};return;}var days=expandDays(m[1]),s=pt(m[2]),e=pt(m[3]);if(days.length&&s!=null)secs.push({courseCode:blk.code||(cur&&cur.c)||'',section:blk.sec||'',classNum:blk.num||'',component:blk.comp||'',status:blk.stat||'',days:days,startMin:s,endMin:e,location:m[4].trim(),instructor:m[5]?m[5].trim():''});blk={};}
+    for(var i=0;i<lines.length;i++){var ln=lines[i].trim();if(!ln)continue;if(/^\s*[A-Z]{2,}-[A-Z]{2}\s+\d+\s*\|\s*\d+\s*units/.test(ln)){var cm=ln.match(/([A-Z]{2,}-[A-Z]{2}\s+\d+)/);if(cm){cur={c:cm[1]};flush();}}else if(/^[A-Z]{2,}-[A-Z]{2}\s+\d+/.test(ln)&&ln.indexOf('Class#')!==0){if(!blk.code)blk.code=ln.split(/\s+/).slice(0,2).join(' ');}else if(/^Class#:\s*(\d+)/.test(ln)){flush();blk.num=ln.match(/^Class#:\s*(\d+)/)[1];if(cur)blk.code=cur.c;}else if(/^Section:\s*(\S+)/.test(ln)){blk.sec=ln.match(/^Section:\s*(\S+)/)[1];}else if(/^Class Status:\s*(.+)/.test(ln)){blk.stat=ln.match(/^Class Status:\s*(.+)/)[1].trim();}else if(/^Component:\s*(.+)/.test(ln)){blk.comp=ln.match(/^Component:\s*(.+)/)[1].trim();}else if(RE.test(ln)){blk.sched=ln;}}
+    flush();return secs;
+  }
+  function cc(c){if(!c)return'other';var l=c.toLowerCase();return l.indexOf('lecture')>=0?'lecture':l.indexOf('recitation')>=0?'recitation':l.indexOf('lab')>=0?'lab':l.indexOf('seminar')>=0?'seminar':'other';}
+  function si(s){if(!s)return{c:'nf-open',l:'Open'};var l=s.toLowerCase();return l.indexOf('wait')>=0?{c:'nf-wait',l:s}:l.indexOf('closed')>=0||l.indexOf('full')>=0?{c:'nf-clo',l:'Closed'}:{c:'nf-open',l:'Open'};}
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function sloc(l){var r=l.match(/Room\s+(\S+)/i),p=l.match(/\(([^)]+)\)/);if(p&&r)return p[1].split(/\s+/).map(function(w){return w[0];}).join('').toUpperCase()+' Rm '+r[1];return r?'Rm '+r[1]:l.slice(0,28);}
+  function topts(val,mode){var h='<option value="'+(mode==='start'?0:1440)+'"'+(val===(mode==='start'?0:1440)?' selected':'')+'>Any time</option>';for(var t=360;t<=1440;t+=30){if(mode==='start'&&t===1440)continue;h+='<option value="'+t+'"'+(val===t?' selected':'')+'>'+fmt(t)+'</option>';}return h;}
+  var allS=parse(document.body.innerText),actI={};
+  function applyF(){var s0=parseInt(document.getElementById('nf-s').value),e0=parseInt(document.getElementById('nf-e').value),keys=Object.keys(actI);var f=allS.filter(function(s){return s.startMin>=s0&&s.endMin<=e0&&(keys.length===0||!s.instructor||actI[s.instructor]);});renderS(f,allS.length);}
+  window.__nfmt={
+    t:function(n){if(actI[n])delete actI[n];else actI[n]=true;var cs=document.querySelectorAll('.nf-chip');for(var i=0;i<cs.length;i++)if(cs[i].getAttribute('data-n')===n)cs[i].className='nf-chip'+(actI[n]?' nf-on':'');applyF();},
+    r:function(){document.getElementById('nf-s').value=0;document.getElementById('nf-e').value=1440;actI={};var cs=document.querySelectorAll('.nf-chip');for(var i=0;i<cs.length;i++)cs[i].className='nf-chip';applyF();},
+    a:applyF
+  };
+  function renderS(secs,total){
+    var el=document.getElementById('nf-results');
+    if(!secs.length){el.innerHTML='<p style="text-align:center;color:#6c757d;padding:24px">No sections match filters.</p>';return;}
+    var byD={};for(var i=0;i<secs.length;i++){var s=secs[i];for(var j=0;j<s.days.length;j++){var d=s.days[j];if(!byD[d])byD[d]=[];byD[d].push(s);}}
+    var h=secs.length!==total?'<p style="font-size:.73rem;color:#6c757d;margin-bottom:10px">Showing <b>'+secs.length+'</b> of '+total+' sections</p>':'';
+    for(var di=0;di<DAY_ORDER.length;di++){var day=DAY_ORDER[di];if(!byD[day])continue;var sorted=byD[day].sort(function(a,b){return a.startMin-b.startMin;});h+='<div style="margin-bottom:18px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="background:#57068c;color:#fff;font-size:.7rem;font-weight:700;padding:3px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px">'+day+'</span><div style="flex:1;height:1px;background:#e9ecef"></div></div><div style="display:flex;flex-direction:column;gap:5px">';
+    for(var k=0;k<sorted.length;k++){var s=sorted[k],c=cc(s.component),st=si(s.status),adays=s.days.map(function(d){return d.slice(0,3);}).join(', ');var bdrClr={lecture:'#57068c',recitation:'#0062cc',lab:'#28a745',seminar:'#fd7e14',other:'#adb5bd'}[c];var codeClr={lecture:'#57068c',recitation:'#0062cc',lab:'#28a745',seminar:'#fd7e14',other:'#6c757d'}[c];var bdgBg={lecture:'#f3e8ff',recitation:'#dbeafe',lab:'#dcfce7',seminar:'#ffedd5',other:'#e9ecef'}[c];var bdgClr={lecture:'#57068c',recitation:'#1d4ed8',lab:'#166534',seminar:'#9a3412',other:'#6c757d'}[c];var stBg={'nf-open':'#dcfce7','nf-wait':'#fef9c3','nf-clo':'#fee2e2'}[st.c];var stClr={'nf-open':'#15803d','nf-wait':'#854d0e','nf-clo':'#b91c1c'}[st.c];
+    h+='<div style="background:#fff;border-radius:8px;padding:11px 13px;display:grid;grid-template-columns:80px 1fr auto;gap:0 10px;align-items:center;border-left:4px solid '+bdrClr+';box-shadow:0 1px 4px rgba(0,0,0,.07)">'
+      +'<div style="text-align:right"><b style="font-size:.88rem;color:#343a40;display:block">'+fmt(s.startMin)+'</b><span style="font-size:.68rem;color:#6c757d">to '+fmt(s.endMin)+'</span></div>'
+      +'<div style="min-width:0"><div style="display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;margin-bottom:2px">'
+      +'<span style="font-size:.76rem;font-weight:700;text-transform:uppercase;color:'+codeClr+'">'+esc(s.courseCode)+'</span>'
+      +'<span style="font-size:.68rem;color:#6c757d;font-weight:600">&sect;'+esc(s.section)+'</span>'
+      +'<span style="font-size:.6rem;font-weight:700;padding:2px 5px;border-radius:4px;text-transform:uppercase;background:'+bdgBg+';color:'+bdgClr+'">'+esc(s.component||'?')+'</span>'
+      +'</div><div style="font-size:.7rem;color:#6c757d;display:flex;flex-wrap:wrap;gap:7px">'
+      +(s.days.length>1?'<span style="font-weight:600;color:#343a40">'+esc(adays)+'</span>':'')
+      +(s.location?'<span>&#128205; '+esc(sloc(s.location))+'</span>':'')
+      +(s.instructor?'<span>&#128100; '+esc(s.instructor)+'</span>':'')
+      +'</div></div>'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span style="font-size:.63rem;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap;background:'+stBg+';color:'+stClr+'">'+esc(st.l)+'</span>'
+      +(s.classNum?'<span style="font-size:.63rem;color:#adb5bd;font-family:monospace">#'+esc(s.classNum)+'</span>':'')
+      +'</div></div>';
+    }
+    h+='</div></div>';}
+    el.innerHTML=h;
+  }
+  var seen={},instrs=[];for(var i=0;i<allS.length;i++){var ins=allS[i].instructor;if(ins&&!seen[ins]){seen[ins]=true;instrs.push(ins);}}instrs.sort();
+  var chips=instrs.map(function(n){return '<span style="font-size:.68rem;font-weight:600;padding:3px 9px;border-radius:12px;border:1.5px solid #e9ecef;background:#fff;color:#6c757d;cursor:pointer;display:inline-block;margin:2px;user-select:none" class="nf-chip" data-n="'+esc(n)+'" onclick="__nfmt.t(\''+esc(n)+'\')">'+esc(n)+'</span>';}).join('');
+  var op=0,wl=0,cl=0,crs={};for(var i=0;i<allS.length;i++){var st=allS[i].status.toLowerCase();if(st.indexOf('wait')>=0)wl++;else if(st.indexOf('closed')>=0||st.indexOf('full')>=0)cl++;else op++;crs[allS[i].courseCode]=1;}var nc=Object.keys(crs).length;
+  var css=document.createElement('style');css.textContent='.nf-chip{transition:all .12s}.nf-on{background:#57068c!important;border-color:#57068c!important;color:#fff!important}';document.head.appendChild(css);
+  var md=document.createElement('div');md.id='__nyu-fmt-modal';md.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;z-index:2147483647;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.55);padding:20px;box-sizing:border-box;overflow-y:auto;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;';
+  md.innerHTML='<div style="background:#f8f9fa;border-radius:12px;width:100%;max-width:800px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.3);margin-top:10px">'
+    +'<div style="background:#57068c;color:#fff;padding:13px 18px;display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:.95rem;font-weight:700">NYU Course Organizer</div><div style="font-size:.72rem;opacity:.8">'+allS.length+' sections &bull; '+nc+' course'+(nc!==1?'s':'')+' &bull; <span style="color:#86efac">'+op+' open</span> &bull; <span style="color:#fde68a">'+wl+' waitlist</span> &bull; <span style="color:#fca5a5">'+cl+' closed</span></div></div>'
+    +'<button onclick="document.getElementById(\'__nyu-fmt-modal\').style.display=\'none\'" style="background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:.82rem;font-weight:700">&times; Close</button></div>'
+    +'<div style="background:#fff;padding:11px 18px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;border-bottom:1px solid #e9ecef">'
+    +'<div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:.65rem;font-weight:700;color:#6c757d;text-transform:uppercase;letter-spacing:.4px">No earlier than</label><select id="nf-s" onchange="__nfmt.a()" style="border:1.5px solid #e9ecef;border-radius:6px;padding:5px 8px;font-size:.8rem">'+topts(0,'start')+'</select></div>'
+    +'<div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:.65rem;font-weight:700;color:#6c757d;text-transform:uppercase;letter-spacing:.4px">No later than</label><select id="nf-e" onchange="__nfmt.a()" style="border:1.5px solid #e9ecef;border-radius:6px;padding:5px 8px;font-size:.8rem">'+topts(1440,'end')+'</select></div>'
+    +(chips?'<div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:160px"><label style="font-size:.65rem;font-weight:700;color:#6c757d;text-transform:uppercase;letter-spacing:.4px">Instructor</label><div>'+chips+'</div></div>':'')
+    +'<button onclick="__nfmt.r()" style="background:none;border:none;color:#adb5bd;cursor:pointer;font-size:.7rem;font-weight:600;text-decoration:underline;padding:0;align-self:flex-end">Reset</button>'
+    +'</div>'
+    +'<div id="nf-results" style="padding:14px 18px;max-height:60vh;overflow-y:auto"></div></div>';
+  document.body.appendChild(md);
+  md.addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){var m=document.getElementById('__nyu-fmt-modal');if(m)m.style.display='none';}});
+  if(!allS.length){document.getElementById('nf-results').innerHTML='<p style="text-align:center;color:#6c757d;padding:28px">No course sections found.<br><small>Navigate to an Albert course listing page and click the bookmarklet.</small></p>';}else{renderS(allS,allS.length);}
+}
+(function(){var l=document.getElementById('bm-link');if(l)l.href='javascript:('+nyuFmtBookmarklet.toString()+')()';})();
 
 function loadDemo() {
   document.getElementById('rawInput').value = `ECON-UB 1 | 4 units
