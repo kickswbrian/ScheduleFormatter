@@ -8,170 +8,119 @@
     :root {
       --purple: #57068c;
       --purple-light: #8900e1;
-      --gray-100: #f8f9fa;
+      --gray-100: #f4f4f8;
       --gray-200: #e9ecef;
       --gray-400: #adb5bd;
       --gray-600: #6c757d;
       --gray-800: #343a40;
       --white: #ffffff;
-      --radius: 10px;
-      --shadow: 0 2px 10px rgba(87,6,140,0.09);
+      --shadow: 0 1px 5px rgba(87,6,140,0.09);
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--gray-100); color: var(--gray-800); min-height: 100vh; font-size: 13px; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--gray-100);
-      color: var(--gray-800);
-      min-height: 100vh;
-    }
+    header { background: var(--purple); color: var(--white); padding: 9px 20px; display: flex; align-items: baseline; gap: 10px; }
+    header h1 { font-size: 0.95rem; font-weight: 700; }
+    header p  { font-size: 0.72rem; opacity: 0.65; }
 
-    header {
-      background: var(--purple);
-      color: var(--white);
-      padding: 16px 28px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    header h1 { font-size: 1.2rem; font-weight: 700; }
-    header p  { font-size: 0.8rem; opacity: 0.75; margin-top: 2px; }
-
-    main { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
+    main { max-width: 1200px; margin: 0 auto; padding: 12px 12px 40px; }
 
     /* ── Input card ── */
-    .input-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 22px;
-      margin-bottom: 24px;
-    }
-    .input-card h2 { font-size: 0.95rem; font-weight: 600; color: var(--purple); margin-bottom: 6px; }
-    .how-to { font-size: 0.8rem; color: var(--gray-600); line-height: 1.6; margin-bottom: 10px; }
-    .how-to ol { padding-left: 16px; margin-top: 3px; }
+    .input-card { background: var(--white); border-radius: 8px; box-shadow: var(--shadow); padding: 12px 14px; margin-bottom: 10px; }
+    .input-card h2 { font-size: 0.82rem; font-weight: 700; color: var(--purple); margin-bottom: 4px; }
+    .how-to { font-size: 0.73rem; color: var(--gray-600); margin-bottom: 6px; }
 
     textarea {
-      width: 100%;
-      height: 180px;
-      border: 1.5px solid var(--gray-200);
-      border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 0.8rem;
+      width: 100%; height: 90px;
+      border: 1.5px solid var(--gray-200); border-radius: 6px;
+      padding: 6px 9px; font-size: 0.73rem;
       font-family: 'SFMono-Regular', Consolas, monospace;
-      resize: vertical;
-      color: var(--gray-800);
-      transition: border-color 0.2s;
+      resize: vertical; color: var(--gray-800);
     }
     textarea:focus { outline: none; border-color: var(--purple-light); }
 
-    .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-    button {
-      padding: 8px 18px;
-      border: none;
-      border-radius: 7px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 600;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-    button:active { transform: scale(0.97); }
+    .btn-row { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap; align-items: center; }
+    button { padding: 5px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 600; transition: opacity 0.15s; }
+    button:active { opacity: 0.8; }
     .btn-primary   { background: var(--purple); color: var(--white); }
     .btn-primary:hover { opacity: 0.87; }
     .btn-secondary { background: var(--gray-200); color: var(--gray-800); }
     .btn-secondary:hover { background: #ced4da; }
 
-    /* ── Summary bar ── */
-    .summary {
-      font-size: 0.8rem;
-      color: var(--gray-600);
-      margin-bottom: 18px;
-      padding: 8px 14px;
-      background: var(--white);
-      border-radius: 8px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    .summary strong { color: var(--purple); }
+    .ext-section { border-top: 1px solid var(--gray-200); margin-top: 10px; padding-top: 8px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+    .ext-section h3 { font-size: 0.78rem; font-weight: 700; color: var(--purple); white-space: nowrap; }
+    .ext-steps { font-size: 0.72rem; color: var(--gray-600); padding-left: 16px; line-height: 1.7; }
+    .ext-steps code { background: var(--gray-100); border: 1px solid var(--gray-200); border-radius: 3px; padding: 1px 4px; font-size: 0.68rem; }
 
-    /* ── Day sections ── */
-    .day-section { margin-bottom: 26px; }
-    .day-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
+    /* ── Filter bar ── */
+    .filter-card {
+      background: var(--white); border-radius: 8px; box-shadow: var(--shadow);
+      padding: 7px 12px; margin-bottom: 10px;
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
     }
+    .filter-stats { font-size: 0.72rem; color: var(--gray-600); margin-right: 4px; }
+    .filter-stats strong { color: var(--purple); }
+    .filter-sep { color: var(--gray-400); font-size: 0.8rem; }
+
+    .filter-group { display: flex; align-items: center; gap: 5px; }
+    .filter-group label { font-size: 0.68rem; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+    .filter-group select {
+      border: 1.5px solid var(--gray-200); border-radius: 5px;
+      padding: 3px 6px; font-size: 0.75rem; color: var(--gray-800);
+      background: var(--white); cursor: pointer;
+    }
+    .filter-group select:focus { outline: none; border-color: var(--purple-light); }
+
+    .instructor-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .chip {
+      font-size: 0.68rem; font-weight: 600; padding: 2px 8px;
+      border-radius: 10px; border: 1.5px solid var(--gray-200);
+      background: var(--white); color: var(--gray-600);
+      cursor: pointer; transition: all 0.12s; user-select: none;
+    }
+    .chip.active { background: var(--purple); border-color: var(--purple); color: var(--white); }
+    .chip:hover:not(.active) { border-color: var(--purple); color: var(--purple); }
+
+    .filter-reset { font-size: 0.68rem; color: var(--gray-400); cursor: pointer; background: none; border: none; padding: 0; font-weight: 600; text-decoration: underline; }
+    .filter-reset:hover { color: var(--purple); }
+
+    .match-count { font-size: 0.72rem; color: var(--gray-600); margin-bottom: 8px; }
+    .match-count strong { color: var(--purple); }
+
+    /* ── Days grid ── */
+    .days-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; align-items: start; }
+    .day-col { display: flex; flex-direction: column; gap: 4px; }
     .day-pill {
-      background: var(--purple);
-      color: var(--white);
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 4px 14px;
-      border-radius: 20px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      white-space: nowrap;
+      background: var(--purple); color: var(--white);
+      font-size: 0.65rem; font-weight: 700; padding: 2px 10px;
+      border-radius: 10px; letter-spacing: 0.5px; text-transform: uppercase;
+      display: inline-block; margin-bottom: 3px; align-self: flex-start;
     }
-    .day-rule { flex: 1; height: 1px; background: var(--gray-200); }
 
-    /* ── Class cards ── */
-    .cards { display: flex; flex-direction: column; gap: 8px; }
-
+    /* ── Compact cards ── */
     .card {
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 14px 16px;
-      display: grid;
-      grid-template-columns: 88px 1fr auto;
-      gap: 0 14px;
-      align-items: center;
-      border-left: 4px solid var(--purple);
+      background: var(--white); border-radius: 6px; box-shadow: var(--shadow);
+      padding: 6px 8px; border-left: 3px solid var(--purple);
     }
     .card.recitation { border-left-color: #0062cc; }
     .card.lab        { border-left-color: #28a745; }
     .card.seminar    { border-left-color: #fd7e14; }
+    .card.other      { border-left-color: var(--gray-400); }
 
-    .card-time { text-align: right; }
-    .time-start { font-size: 0.95rem; font-weight: 700; color: var(--gray-800); display: block; }
-    .time-end   { font-size: 0.72rem; color: var(--gray-600); display: block; margin-top: 1px; }
+    .card-time { font-size: 0.8rem; font-weight: 700; color: var(--gray-800); line-height: 1.2; }
+    .card-time em { font-style: normal; font-size: 0.65rem; font-weight: 400; color: var(--gray-600); }
 
-    .card-main { min-width: 0; }
-    .card-top {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 3px;
-    }
-    .course-code {
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      color: var(--purple);
-    }
+    .card-info { margin-top: 2px; display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+    .course-code { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--purple); letter-spacing: 0.2px; }
     .card.recitation .course-code { color: #0062cc; }
     .card.lab        .course-code { color: #28a745; }
     .card.seminar    .course-code { color: #fd7e14; }
+    .section-num { font-size: 0.65rem; color: var(--gray-600); font-weight: 600; }
 
-    .section-num {
-      font-size: 0.72rem;
-      color: var(--gray-600);
-      font-weight: 600;
-    }
+    .card-badges { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 3px; }
     .comp-badge {
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
+      font-size: 0.58rem; font-weight: 700; padding: 1px 5px;
+      border-radius: 3px; text-transform: uppercase; letter-spacing: 0.2px;
     }
     .comp-lecture    { background: #f3e8ff; color: #57068c; }
     .comp-recitation { background: #dbeafe; color: #1d4ed8; }
@@ -179,174 +128,54 @@
     .comp-seminar    { background: #ffedd5; color: #9a3412; }
     .comp-other      { background: var(--gray-200); color: var(--gray-600); }
 
-    .card-meta {
-      font-size: 0.75rem;
-      color: var(--gray-600);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 2px;
-    }
-    .card-meta span { display: flex; align-items: center; gap: 3px; }
-    .days-tag { font-weight: 600; color: var(--gray-800); }
-
-    .card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-
     .status-badge {
-      font-size: 0.68rem;
-      font-weight: 700;
-      padding: 3px 9px;
-      border-radius: 12px;
-      white-space: nowrap;
-      letter-spacing: 0.2px;
+      font-size: 0.58rem; font-weight: 700; padding: 1px 5px;
+      border-radius: 3px; white-space: nowrap;
     }
     .status-open     { background: #dcfce7; color: #15803d; }
     .status-waitlist { background: #fef9c3; color: #854d0e; }
     .status-closed   { background: #fee2e2; color: #b91c1c; }
 
-    .class-num {
-      font-size: 0.68rem;
-      color: var(--gray-400);
-      font-family: monospace;
+    .card-instr {
+      font-size: 0.65rem; color: var(--gray-600); margin-top: 3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-
-    /* ── Filter bar ── */
-    .filter-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 14px 18px;
-      margin-bottom: 18px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      align-items: flex-start;
-    }
-    .filter-group { display: flex; flex-direction: column; gap: 5px; min-width: 140px; }
-    .filter-group label { font-size: 0.72rem; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.4px; }
-    .filter-group select {
-      border: 1.5px solid var(--gray-200);
-      border-radius: 6px;
-      padding: 5px 8px;
-      font-size: 0.82rem;
-      color: var(--gray-800);
-      background: var(--white);
-      cursor: pointer;
-    }
-    .filter-group select:focus { outline: none; border-color: var(--purple-light); }
-
-    .instructor-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-    .chip {
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 14px;
-      border: 1.5px solid var(--gray-200);
-      background: var(--white);
-      color: var(--gray-600);
-      cursor: pointer;
-      transition: all 0.12s;
-      user-select: none;
-    }
-    .chip.active {
-      background: var(--purple);
-      border-color: var(--purple);
-      color: var(--white);
-    }
-    .chip:hover:not(.active) { border-color: var(--purple-light); color: var(--purple); }
-
-    .filter-reset {
-      font-size: 0.72rem;
-      color: var(--gray-400);
-      cursor: pointer;
-      background: none;
-      border: none;
-      padding: 0;
-      font-weight: 600;
-      align-self: flex-end;
-      margin-bottom: 2px;
-      text-decoration: underline;
-    }
-    .filter-reset:hover { color: var(--purple); }
-
-    .match-count {
-      font-size: 0.75rem;
-      color: var(--gray-600);
-      margin-bottom: 14px;
-    }
-    .match-count strong { color: var(--purple); }
+    .card-num { font-size: 0.6rem; color: var(--gray-400); font-family: monospace; margin-top: 1px; }
 
     /* ── Error / empty ── */
-    .message {
-      background: var(--white);
-      border-radius: var(--radius);
-      padding: 24px;
-      text-align: center;
-      color: var(--gray-600);
-      box-shadow: var(--shadow);
-      font-size: 0.88rem;
-    }
-    .message.error {
-      border-left: 4px solid #dc3545;
-      color: #dc3545;
-      text-align: left;
-    }
+    .message { background: var(--white); border-radius: 8px; padding: 18px; text-align: center; color: var(--gray-600); box-shadow: var(--shadow); font-size: 0.82rem; }
+    .message.error { border-left: 4px solid #dc3545; color: #dc3545; text-align: left; }
 
     #output { display: none; }
 
-    .bm-section { border-top: 1px solid var(--gray-200); margin-top: 16px; padding-top: 14px; }
-    .bm-section p { font-size: 0.78rem; color: var(--gray-600); margin-bottom: 8px; }
-    .bm-btn { display: inline-block; background: var(--purple); color: var(--white); padding: 8px 16px; border-radius: 7px; font-size: 0.85rem; font-weight: 700; text-decoration: none; cursor: grab; user-select: none; }
-    .bm-hint { font-size: 0.73rem; color: var(--gray-400); margin-top: 8px; line-height: 1.5; }
-
-    .ext-section { border-top: 1px solid var(--gray-200); margin-top: 16px; padding-top: 14px; }
-    .ext-section h3 { font-size: 0.88rem; font-weight: 700; color: var(--purple); margin-bottom: 6px; }
-    .ext-steps { font-size: 0.78rem; color: var(--gray-600); padding-left: 18px; line-height: 1.9; }
-    .ext-steps li { margin-bottom: 1px; }
-    .ext-steps code { background: var(--gray-100); border: 1px solid var(--gray-200); border-radius: 4px; padding: 1px 5px; font-size: 0.75rem; }
-    .ext-note { font-size: 0.72rem; color: var(--gray-400); margin-top: 8px; }
-
-    @media (max-width: 560px) {
-      .card { grid-template-columns: 72px 1fr; }
-      .card-right { display: none; }
+    @media (max-width: 500px) {
+      .days-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <div>
-    <h1>NYU Albert Course Organizer</h1>
-    <p>Paste course listings &mdash; get a clean list sorted by day &amp; time</p>
-  </div>
+  <h1>NYU Albert Course Organizer</h1>
+  <p>Paste course listings &mdash; sorted by day &amp; time</p>
 </header>
 
 <main>
   <div class="input-card">
     <h2>Paste Course Listings</h2>
-    <div class="how-to">
-      In NYU Albert, browse a course, then select all &amp; copy the entire page text and paste it below.
-      Repeat for as many courses as you want &mdash; just keep appending.
-    </div>
-    <textarea id="rawInput" placeholder="Paste Albert course listing text here...
-
-The app reads the format like:
-  09/02/2026 - 12/14/2026  Mon,Wed  11.00 AM - 12.15 PM  at [room]  with [instructor]"></textarea>
+    <div class="how-to">In NYU Albert, browse a course &rarr; select all &amp; copy the page &rarr; paste below. Repeat for each course.</div>
+    <textarea id="rawInput" placeholder="Paste Albert course listing text here...&#10;Format: 09/02/2026 - 12/14/2026  Mon,Wed  11.00 AM - 12.15 PM  at [room]  with [instructor]"></textarea>
     <div class="btn-row">
       <button class="btn-primary" onclick="run()">Organize Courses</button>
-      <button class="btn-secondary" onclick="loadDemo()">Load Demo</button>
+      <button class="btn-secondary" onclick="loadDemo()">Demo</button>
       <button class="btn-secondary" onclick="clearAll()">Clear</button>
-    </div>
-    <div class="ext-section">
-      <h3>&#9889; Use directly on Albert (Chrome Extension)</h3>
-      <ol class="ext-steps">
-        <li>Download the <strong>extension</strong> folder that came with this file</li>
-        <li>Open Chrome and go to <code>chrome://extensions</code></li>
-        <li>Turn on <strong>Developer mode</strong> (top-right toggle)</li>
-        <li>Click <strong>Load unpacked</strong> and select the <code>extension</code> folder</li>
-        <li>Navigate to any Albert course listing &mdash; click the <strong>NYU icon</strong> in your toolbar</li>
-      </ol>
-      <p class="ext-note">The overlay pops up instantly with filters &mdash; no copy-paste needed.</p>
+      <div class="ext-section">
+        <h3>&#9889; Chrome Extension:</h3>
+        <ol class="ext-steps">
+          <li>Load the <code>extension/</code> folder via <code>chrome://extensions</code> &rarr; Developer mode &rarr; Load unpacked</li>
+          <li>On any Albert course listing, click the NYU icon &rarr; overlay appears instantly</li>
+        </ol>
+      </div>
     </div>
   </div>
 
@@ -447,22 +276,15 @@ function parse(raw) {
 
 // ── Filter state ─────────────────────────────────────────────────────────────
 let allSections = [];
-let activeInstructors = new Set(); // empty = show all
-
-function getFilters() {
-  return {
-    startAfter:  parseInt(document.getElementById('fStartAfter').value),
-    endBefore:   parseInt(document.getElementById('fEndBefore').value),
-    instructors: activeInstructors
-  };
-}
+let activeInstructors = new Set();
 
 function applyFilters() {
-  const f = getFilters();
+  const startAfter = parseInt(document.getElementById('fStartAfter').value);
+  const endBefore  = parseInt(document.getElementById('fEndBefore').value);
   const filtered = allSections.filter(s => {
-    if (s.startMin < f.startAfter) return false;
-    if (s.endMin   > f.endBefore)  return false;
-    if (f.instructors.size > 0 && s.instructor && !f.instructors.has(s.instructor)) return false;
+    if (s.startMin < startAfter) return false;
+    if (s.endMin   > endBefore)  return false;
+    if (activeInstructors.size > 0 && s.instructor && !activeInstructors.has(s.instructor)) return false;
     return true;
   });
   renderSections(filtered, allSections.length);
@@ -485,56 +307,21 @@ function resetFilters() {
   applyFilters();
 }
 
-// ── Time select options ───────────────────────────────────────────────────────
 function timeOptions(selectedVal, mode) {
-  const slots = [];
-  for (let h = 6; h <= 23; h++) {
-    for (const m of [0, 30]) {
-      slots.push(h * 60 + m);
-    }
-  }
-  slots.push(1440); // midnight cap
-
-  const noneVal  = mode === 'start' ? 0    : 1440;
-  const noneLabel = mode === 'start' ? 'Any time' : 'Any time';
-
-  let html = `<option value="${noneVal}"${selectedVal===noneVal?' selected':''}>${noneLabel}</option>`;
-  for (const t of slots) {
+  const noneVal = mode === 'start' ? 0 : 1440;
+  let html = `<option value="${noneVal}"${selectedVal===noneVal?' selected':''}>Any</option>`;
+  for (let t = 360; t <= 1440; t += 30) {
     if (mode === 'start' && t === 1440) continue;
     if (mode === 'end'   && t === 0)    continue;
-    const sel = selectedVal === t ? ' selected' : '';
-    html += `<option value="${t}"${sel}>${fmt12(t)}</option>`;
+    html += `<option value="${t}"${selectedVal===t?' selected':''}>${fmt12(t)}</option>`;
   }
   return html;
 }
 
-// ── Render filter bar ─────────────────────────────────────────────────────────
-function renderFilterBar(sections) {
-  const instructors = [...new Set(sections.map(s => s.instructor).filter(Boolean))].sort();
-  const hasInstructors = instructors.length > 0;
-
-  const chipsHTML = instructors.map(name =>
-    `<span class="chip" data-instructor="${esc(name)}" onclick="toggleInstructor('${esc(name)}')">${esc(name)}</span>`
-  ).join('');
-
-  return `<div class="filter-card">
-    <div class="filter-group">
-      <label>No earlier than</label>
-      <select id="fStartAfter" onchange="applyFilters()">${timeOptions(0,'start')}</select>
-    </div>
-    <div class="filter-group">
-      <label>No later than</label>
-      <select id="fEndBefore" onchange="applyFilters()">${timeOptions(1440,'end')}</select>
-    </div>
-    ${hasInstructors ? `<div class="filter-group" style="flex:1;min-width:200px;">
-      <label>Instructor (click to filter)</label>
-      <div class="instructor-chips">${chipsHTML}</div>
-    </div>` : ''}
-    <button class="filter-reset" onclick="resetFilters()">Reset filters</button>
-  </div>`;
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Render sections ───────────────────────────────────────────────────────────
 function compClass(comp) {
   if (!comp) return 'other';
   const c = comp.toLowerCase();
@@ -548,26 +335,40 @@ function compClass(comp) {
 function statusInfo(s) {
   if (!s) return { cls: 'status-open', label: 'Open' };
   const l = s.toLowerCase();
-  if (l.includes('wait'))                          return { cls: 'status-waitlist', label: s };
+  if (l.includes('wait'))                          return { cls: 'status-waitlist', label: 'Wait' };
   if (l.includes('closed') || l.includes('full')) return { cls: 'status-closed',   label: 'Closed' };
   return { cls: 'status-open', label: 'Open' };
 }
 
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+// ── Render filter bar ─────────────────────────────────────────────────────────
+function renderFilterBar(sections, open, waitlist, closed, courses) {
+  const instructors = [...new Set(sections.map(s => s.instructor).filter(Boolean))].sort();
+  const chips = instructors.map(n =>
+    `<span class="chip" data-instructor="${esc(n)}" onclick="toggleInstructor('${esc(n)}')">${esc(n)}</span>`
+  ).join('');
+
+  return `<div class="filter-card">
+    <span class="filter-stats">
+      <strong>${sections.length}</strong> sections &middot; <strong>${courses}</strong> course${courses!==1?'s':''} &middot;
+      <strong style="color:#15803d">${open}</strong> open &middot;
+      <strong style="color:#854d0e">${waitlist}</strong> wait &middot;
+      <strong style="color:#b91c1c">${closed}</strong> closed
+    </span>
+    <span class="filter-sep">|</span>
+    <div class="filter-group">
+      <label>From</label>
+      <select id="fStartAfter" onchange="applyFilters()">${timeOptions(0,'start')}</select>
+    </div>
+    <div class="filter-group">
+      <label>To</label>
+      <select id="fEndBefore" onchange="applyFilters()">${timeOptions(1440,'end')}</select>
+    </div>
+    ${instructors.length ? `<span class="filter-sep">|</span><div class="instructor-chips">${chips}</div>` : ''}
+    <button class="filter-reset" onclick="resetFilters()">Reset</button>
+  </div>`;
 }
 
-function shortLocation(loc) {
-  const roomMatch  = loc.match(/Room\s+(\S+)/i);
-  const parenMatch = loc.match(/\(([^)]+)\)/);
-  if (parenMatch && roomMatch) {
-    const abbr = parenMatch[1].split(/\s+/).map(w => w[0]).join('').toUpperCase();
-    return `${abbr} Rm ${roomMatch[1]}`;
-  }
-  if (roomMatch) return `Rm ${roomMatch[1]}`;
-  return loc.length > 30 ? loc.slice(0,28)+'...' : loc;
-}
-
+// ── Render sections as day columns ────────────────────────────────────────────
 function renderSections(sections, total) {
   const resultsEl = document.getElementById('results');
 
@@ -588,46 +389,35 @@ function renderSections(sections, total) {
     ? `<div class="match-count">Showing <strong>${sections.length}</strong> of ${total} sections</div>`
     : '';
 
-  let html = showing;
+  let html = showing + '<div class="days-grid">';
 
   for (const day of DAY_ORDER) {
     if (!byDay[day]) continue;
     const sorted = byDay[day].sort((a,b) => a.startMin - b.startMin);
 
-    html += `<div class="day-section">
-      <div class="day-header"><span class="day-pill">${day}</span><div class="day-rule"></div></div>
-      <div class="cards">`;
+    html += `<div class="day-col"><span class="day-pill">${day}</span>`;
 
     for (const s of sorted) {
-      const cc      = compClass(s.component);
-      const si      = statusInfo(s.status);
-      const allDays = s.days.map(d => d.slice(0,3)).join(', ');
+      const cc = compClass(s.component);
+      const si = statusInfo(s.status);
       html += `<div class="card ${cc}">
-        <div class="card-time">
-          <span class="time-start">${fmt12(s.startMin)}</span>
-          <span class="time-end">to ${fmt12(s.endMin)}</span>
+        <div class="card-time">${fmt12(s.startMin)}<em> – ${fmt12(s.endMin)}</em></div>
+        <div class="card-info">
+          <span class="course-code">${esc(s.courseCode)}</span>
+          <span class="section-num">§${esc(s.section)}</span>
         </div>
-        <div class="card-main">
-          <div class="card-top">
-            <span class="course-code">${esc(s.courseCode)}</span>
-            <span class="section-num">&sect;${esc(s.section)}</span>
-            <span class="comp-badge comp-${cc}">${esc(s.component||'?')}</span>
-          </div>
-          <div class="card-meta">
-            ${s.days.length > 1 ? `<span class="days-tag">${esc(allDays)}</span>` : ''}
-            ${s.location   ? `<span>&#128205; ${esc(shortLocation(s.location))}</span>` : ''}
-            ${s.instructor ? `<span>&#128100; ${esc(s.instructor)}</span>` : ''}
-          </div>
-        </div>
-        <div class="card-right">
+        <div class="card-badges">
+          <span class="comp-badge comp-${cc}">${esc(s.component||'?')}</span>
           <span class="status-badge ${si.cls}">${esc(si.label)}</span>
-          ${s.classNum ? `<span class="class-num">#${esc(s.classNum)}</span>` : ''}
         </div>
+        ${s.instructor ? `<div class="card-instr">👤 ${esc(s.instructor)}</div>` : ''}
+        ${s.classNum   ? `<div class="card-num">#${esc(s.classNum)}</div>` : ''}
       </div>`;
     }
-    html += `</div></div>`;
+    html += `</div>`;
   }
 
+  html += '</div>';
   resultsEl.innerHTML = html;
 }
 
@@ -650,18 +440,13 @@ function run() {
     return;
   }
 
-  const open     = allSections.filter(s => !s.status.toLowerCase().includes('wait') && !s.status.toLowerCase().includes('closed')).length;
+  const open     = allSections.filter(s => !s.status.toLowerCase().includes('wait') && !s.status.toLowerCase().includes('closed') && !s.status.toLowerCase().includes('full')).length;
   const waitlist = allSections.filter(s => s.status.toLowerCase().includes('wait')).length;
   const closed   = allSections.filter(s => s.status.toLowerCase().includes('closed') || s.status.toLowerCase().includes('full')).length;
   const courses  = new Set(allSections.map(s => s.courseCode)).size;
 
-  const summaryHTML = `<div class="summary">
-    <span><strong>${allSections.length}</strong> sections &mdash; <strong>${courses}</strong> course${courses!==1?'s':''}</span>
-    <span><strong style="color:#15803d">${open}</strong> open &nbsp;|&nbsp; <strong style="color:#854d0e">${waitlist}</strong> waitlist &nbsp;|&nbsp; <strong style="color:#b91c1c">${closed}</strong> closed</span>
-  </div>`;
-
   document.getElementById('output').innerHTML =
-    summaryHTML + renderFilterBar(allSections) + '<div id="results"></div>';
+    renderFilterBar(allSections, open, waitlist, closed, courses) + '<div id="results"></div>';
   document.getElementById('output').style.display = 'block';
 
   renderSections(allSections, allSections.length);
@@ -674,81 +459,6 @@ function clearAll() {
   allSections = [];
   activeInstructors.clear();
 }
-
-// ── Bookmarklet ───────────────────────────────────────────────────────────────
-function nyuFmtBookmarklet() {
-  var modal = document.getElementById('__nyu-fmt-modal');
-  if (modal) { modal.style.display = modal.style.display === 'none' ? 'flex' : 'none'; return; }
-  var DAY_ORDER = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-  var DAY_MAP = {mon:'Monday',tue:'Tuesday',wed:'Wednesday',thu:'Thursday',fri:'Friday',sat:'Saturday',sun:'Sunday',mo:'Monday',tu:'Tuesday',we:'Wednesday',th:'Thursday',fr:'Friday',sa:'Saturday',su:'Sunday'};
-  function expandDays(s) { return s.split(/[,\s]+/).map(function(d){return DAY_MAP[d.toLowerCase().slice(0,3)]||DAY_MAP[d.toLowerCase().slice(0,2)]||null;}).filter(Boolean); }
-  function pt(s) { var m=s.trim().match(/^(\d{1,2})\.(\d{2})\s*(AM|PM)$/i); if(!m)return null; var h=parseInt(m[1]),mn=parseInt(m[2]),ap=m[3].toUpperCase(); if(ap==='PM'&&h!==12)h+=12; if(ap==='AM'&&h===12)h=0; return h*60+mn; }
-  function fmt(t) { if(t==null)return''; var h=Math.floor(t/60),m=t%60,ap=h>=12?'PM':'AM',h12=h%12||12; return h12+':'+(m<10?'0':'')+m+' '+ap; }
-  var RE=/\d{2}\/\d{2}\/\d{4}\s*-\s*\d{2}\/\d{2}\/\d{4}\s+([\w,]+)\s+(\d{1,2}\.\d{2}\s*[AP]M)\s*-\s*(\d{1,2}\.\d{2}\s*[AP]M)\s+at\s+(.+?)(?:\s+with\s+(.+))?$/i;
-  function parse(raw) {
-    var lines=raw.split('\n'),secs=[],cur=null,blk={};
-    function flush(){if(!blk.sched)return;var m=blk.sched.match(RE);if(!m){blk={};return;}var days=expandDays(m[1]),s=pt(m[2]),e=pt(m[3]);if(days.length&&s!=null)secs.push({courseCode:blk.code||(cur&&cur.c)||'',section:blk.sec||'',classNum:blk.num||'',component:blk.comp||'',status:blk.stat||'',days:days,startMin:s,endMin:e,location:m[4].trim(),instructor:m[5]?m[5].trim():''});blk={};}
-    for(var i=0;i<lines.length;i++){var ln=lines[i].trim();if(!ln)continue;if(/^\s*[A-Z]{2,}-[A-Z]{2}\s+\d+\s*\|\s*\d+\s*units/.test(ln)){var cm=ln.match(/([A-Z]{2,}-[A-Z]{2}\s+\d+)/);if(cm){cur={c:cm[1]};flush();}}else if(/^[A-Z]{2,}-[A-Z]{2}\s+\d+/.test(ln)&&ln.indexOf('Class#')!==0){if(!blk.code)blk.code=ln.split(/\s+/).slice(0,2).join(' ');}else if(/^Class#:\s*(\d+)/.test(ln)){flush();blk.num=ln.match(/^Class#:\s*(\d+)/)[1];if(cur)blk.code=cur.c;}else if(/^Section:\s*(\S+)/.test(ln)){blk.sec=ln.match(/^Section:\s*(\S+)/)[1];}else if(/^Class Status:\s*(.+)/.test(ln)){blk.stat=ln.match(/^Class Status:\s*(.+)/)[1].trim();}else if(/^Component:\s*(.+)/.test(ln)){blk.comp=ln.match(/^Component:\s*(.+)/)[1].trim();}else if(RE.test(ln)){blk.sched=ln;}}
-    flush();return secs;
-  }
-  function cc(c){if(!c)return'other';var l=c.toLowerCase();return l.indexOf('lecture')>=0?'lecture':l.indexOf('recitation')>=0?'recitation':l.indexOf('lab')>=0?'lab':l.indexOf('seminar')>=0?'seminar':'other';}
-  function si(s){if(!s)return{c:'nf-open',l:'Open'};var l=s.toLowerCase();return l.indexOf('wait')>=0?{c:'nf-wait',l:s}:l.indexOf('closed')>=0||l.indexOf('full')>=0?{c:'nf-clo',l:'Closed'}:{c:'nf-open',l:'Open'};}
-  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-  function sloc(l){var r=l.match(/Room\s+(\S+)/i),p=l.match(/\(([^)]+)\)/);if(p&&r)return p[1].split(/\s+/).map(function(w){return w[0];}).join('').toUpperCase()+' Rm '+r[1];return r?'Rm '+r[1]:l.slice(0,28);}
-  function topts(val,mode){var h='<option value="'+(mode==='start'?0:1440)+'"'+(val===(mode==='start'?0:1440)?' selected':'')+'>Any time</option>';for(var t=360;t<=1440;t+=30){if(mode==='start'&&t===1440)continue;h+='<option value="'+t+'"'+(val===t?' selected':'')+'>'+fmt(t)+'</option>';}return h;}
-  var allS=parse(document.body.innerText),actI={};
-  function applyF(){var s0=parseInt(document.getElementById('nf-s').value),e0=parseInt(document.getElementById('nf-e').value),keys=Object.keys(actI);var f=allS.filter(function(s){return s.startMin>=s0&&s.endMin<=e0&&(keys.length===0||!s.instructor||actI[s.instructor]);});renderS(f,allS.length);}
-  window.__nfmt={
-    t:function(n){if(actI[n])delete actI[n];else actI[n]=true;var cs=document.querySelectorAll('.nf-chip');for(var i=0;i<cs.length;i++)if(cs[i].getAttribute('data-n')===n)cs[i].className='nf-chip'+(actI[n]?' nf-on':'');applyF();},
-    r:function(){document.getElementById('nf-s').value=0;document.getElementById('nf-e').value=1440;actI={};var cs=document.querySelectorAll('.nf-chip');for(var i=0;i<cs.length;i++)cs[i].className='nf-chip';applyF();},
-    a:applyF
-  };
-  function renderS(secs,total){
-    var el=document.getElementById('nf-results');
-    if(!secs.length){el.innerHTML='<p style="text-align:center;color:#6c757d;padding:24px">No sections match filters.</p>';return;}
-    var byD={};for(var i=0;i<secs.length;i++){var s=secs[i];for(var j=0;j<s.days.length;j++){var d=s.days[j];if(!byD[d])byD[d]=[];byD[d].push(s);}}
-    var h=secs.length!==total?'<p style="font-size:.73rem;color:#6c757d;margin-bottom:10px">Showing <b>'+secs.length+'</b> of '+total+' sections</p>':'';
-    for(var di=0;di<DAY_ORDER.length;di++){var day=DAY_ORDER[di];if(!byD[day])continue;var sorted=byD[day].sort(function(a,b){return a.startMin-b.startMin;});h+='<div style="margin-bottom:18px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="background:#57068c;color:#fff;font-size:.7rem;font-weight:700;padding:3px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px">'+day+'</span><div style="flex:1;height:1px;background:#e9ecef"></div></div><div style="display:flex;flex-direction:column;gap:5px">';
-    for(var k=0;k<sorted.length;k++){var s=sorted[k],c=cc(s.component),st=si(s.status),adays=s.days.map(function(d){return d.slice(0,3);}).join(', ');var bdrClr={lecture:'#57068c',recitation:'#0062cc',lab:'#28a745',seminar:'#fd7e14',other:'#adb5bd'}[c];var codeClr={lecture:'#57068c',recitation:'#0062cc',lab:'#28a745',seminar:'#fd7e14',other:'#6c757d'}[c];var bdgBg={lecture:'#f3e8ff',recitation:'#dbeafe',lab:'#dcfce7',seminar:'#ffedd5',other:'#e9ecef'}[c];var bdgClr={lecture:'#57068c',recitation:'#1d4ed8',lab:'#166534',seminar:'#9a3412',other:'#6c757d'}[c];var stBg={'nf-open':'#dcfce7','nf-wait':'#fef9c3','nf-clo':'#fee2e2'}[st.c];var stClr={'nf-open':'#15803d','nf-wait':'#854d0e','nf-clo':'#b91c1c'}[st.c];
-    h+='<div style="background:#fff;border-radius:8px;padding:11px 13px;display:grid;grid-template-columns:80px 1fr auto;gap:0 10px;align-items:center;border-left:4px solid '+bdrClr+';box-shadow:0 1px 4px rgba(0,0,0,.07)">'
-      +'<div style="text-align:right"><b style="font-size:.88rem;color:#343a40;display:block">'+fmt(s.startMin)+'</b><span style="font-size:.68rem;color:#6c757d">to '+fmt(s.endMin)+'</span></div>'
-      +'<div style="min-width:0"><div style="display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;margin-bottom:2px">'
-      +'<span style="font-size:.76rem;font-weight:700;text-transform:uppercase;color:'+codeClr+'">'+esc(s.courseCode)+'</span>'
-      +'<span style="font-size:.68rem;color:#6c757d;font-weight:600">&sect;'+esc(s.section)+'</span>'
-      +'<span style="font-size:.6rem;font-weight:700;padding:2px 5px;border-radius:4px;text-transform:uppercase;background:'+bdgBg+';color:'+bdgClr+'">'+esc(s.component||'?')+'</span>'
-      +'</div><div style="font-size:.7rem;color:#6c757d;display:flex;flex-wrap:wrap;gap:7px">'
-      +(s.days.length>1?'<span style="font-weight:600;color:#343a40">'+esc(adays)+'</span>':'')
-      +(s.location?'<span>&#128205; '+esc(sloc(s.location))+'</span>':'')
-      +(s.instructor?'<span>&#128100; '+esc(s.instructor)+'</span>':'')
-      +'</div></div>'
-      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span style="font-size:.63rem;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap;background:'+stBg+';color:'+stClr+'">'+esc(st.l)+'</span>'
-      +(s.classNum?'<span style="font-size:.63rem;color:#adb5bd;font-family:monospace">#'+esc(s.classNum)+'</span>':'')
-      +'</div></div>';
-    }
-    h+='</div></div>';}
-    el.innerHTML=h;
-  }
-  var seen={},instrs=[];for(var i=0;i<allS.length;i++){var ins=allS[i].instructor;if(ins&&!seen[ins]){seen[ins]=true;instrs.push(ins);}}instrs.sort();
-  var chips=instrs.map(function(n){return '<span style="font-size:.68rem;font-weight:600;padding:3px 9px;border-radius:12px;border:1.5px solid #e9ecef;background:#fff;color:#6c757d;cursor:pointer;display:inline-block;margin:2px;user-select:none" class="nf-chip" data-n="'+esc(n)+'" onclick="__nfmt.t(\''+esc(n)+'\')">'+esc(n)+'</span>';}).join('');
-  var op=0,wl=0,cl=0,crs={};for(var i=0;i<allS.length;i++){var st=allS[i].status.toLowerCase();if(st.indexOf('wait')>=0)wl++;else if(st.indexOf('closed')>=0||st.indexOf('full')>=0)cl++;else op++;crs[allS[i].courseCode]=1;}var nc=Object.keys(crs).length;
-  var css=document.createElement('style');css.textContent='.nf-chip{transition:all .12s}.nf-on{background:#57068c!important;border-color:#57068c!important;color:#fff!important}';document.head.appendChild(css);
-  var md=document.createElement('div');md.id='__nyu-fmt-modal';md.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;z-index:2147483647;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.55);padding:20px;box-sizing:border-box;overflow-y:auto;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;';
-  md.innerHTML='<div style="background:#f8f9fa;border-radius:12px;width:100%;max-width:800px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.3);margin-top:10px">'
-    +'<div style="background:#57068c;color:#fff;padding:13px 18px;display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:.95rem;font-weight:700">NYU Course Organizer</div><div style="font-size:.72rem;opacity:.8">'+allS.length+' sections &bull; '+nc+' course'+(nc!==1?'s':'')+' &bull; <span style="color:#86efac">'+op+' open</span> &bull; <span style="color:#fde68a">'+wl+' waitlist</span> &bull; <span style="color:#fca5a5">'+cl+' closed</span></div></div>'
-    +'<button onclick="document.getElementById(\'__nyu-fmt-modal\').style.display=\'none\'" style="background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:.82rem;font-weight:700">&times; Close</button></div>'
-    +'<div style="background:#fff;padding:11px 18px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;border-bottom:1px solid #e9ecef">'
-    +'<div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:.65rem;font-weight:700;color:#6c757d;text-transform:uppercase;letter-spacing:.4px">No earlier than</label><select id="nf-s" onchange="__nfmt.a()" style="border:1.5px solid #e9ecef;border-radius:6px;padding:5px 8px;font-size:.8rem">'+topts(0,'start')+'</select></div>'
-    +'<div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:.65rem;font-weight:700;color:#6c757d;text-transform:uppercase;letter-spacing:.4px">No later than</label><select id="nf-e" onchange="__nfmt.a()" style="border:1.5px solid #e9ecef;border-radius:6px;padding:5px 8px;font-size:.8rem">'+topts(1440,'end')+'</select></div>'
-    +(chips?'<div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:160px"><label style="font-size:.65rem;font-weight:700;color:#6c757d;text-transform:uppercase;letter-spacing:.4px">Instructor</label><div>'+chips+'</div></div>':'')
-    +'<button onclick="__nfmt.r()" style="background:none;border:none;color:#adb5bd;cursor:pointer;font-size:.7rem;font-weight:600;text-decoration:underline;padding:0;align-self:flex-end">Reset</button>'
-    +'</div>'
-    +'<div id="nf-results" style="padding:14px 18px;max-height:60vh;overflow-y:auto"></div></div>';
-  document.body.appendChild(md);
-  md.addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'){var m=document.getElementById('__nyu-fmt-modal');if(m)m.style.display='none';}});
-  if(!allS.length){document.getElementById('nf-results').innerHTML='<p style="text-align:center;color:#6c757d;padding:28px">No course sections found.<br><small>Navigate to an Albert course listing page and click the bookmarklet.</small></p>';}else{renderS(allS,allS.length);}
-}
-(function(){var l=document.getElementById('bm-link');if(l)l.href='javascript:('+nyuFmtBookmarklet.toString()+')()';})();
 
 function loadDemo() {
   document.getElementById('rawInput').value = `ECON-UB 1 | 4 units
