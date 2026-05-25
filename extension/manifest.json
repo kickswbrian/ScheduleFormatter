@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
   "name": "NYU Albert Course Organizer",
-  "version": "1.0",
-  "description": "Click the icon on any Albert course listing to see sections sorted by day and time with filters.",
+  "version": "2.0",
+  "description": "Auto-shows a live schedule panel on NYU Albert course listing pages.",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": ["https://sis.portal.nyu.edu/*"],
   "action": {
-    "default_title": "Organize Albert Courses",
+    "default_title": "Toggle NYU Organizer Panel",
     "default_icon": {
       "16": "icon16.png",
       "48": "icon48.png"
@@ -14,5 +14,11 @@
   },
   "background": {
     "service_worker": "background.js"
-  }
+  },
+  "content_scripts": [{
+    "matches": ["https://sis.portal.nyu.edu/*"],
+    "js": ["content.js"],
+    "run_at": "document_idle",
+    "all_frames": false
+  }]
 }
