@@ -1,18 +1,16 @@
 (function () {
-  // Prevent double-injection on SPA navigations
   if (window.__nyuOrganizerActive) return;
   window.__nyuOrganizerActive = true;
 
   var targetDoc = window.top.document;
 
-  // Toolbar button toggles panel show/hide
   chrome.runtime.onMessage.addListener(function(msg) {
     if (msg.action !== 'togglePanel') return;
     var p = targetDoc.getElementById('__nyu-panel');
     if (p) p.style.display = p.style.display === 'none' ? '' : 'none';
   });
 
-  // ── Gather text from this page + all same-origin iframes ─────────────────
+  // ── Gather text from page + all same-origin iframes ──────────────────────
   function gatherText(doc) {
     var text = '';
     try { text += (doc.body.innerText || ''); } catch(e) {}
@@ -164,8 +162,10 @@
   var activeInstructors = {};
 
   function applyFilters() {
-    var s0 = parseInt(targetDoc.getElementById('nf-start').value);
-    var e0 = parseInt(targetDoc.getElementById('nf-end').value);
+    var startEl = targetDoc.getElementById('nf-start');
+    var endEl   = targetDoc.getElementById('nf-end');
+    if (!startEl || !endEl) return;
+    var s0 = parseInt(startEl.value), e0 = parseInt(endEl.value);
     var keys = Object.keys(activeInstructors);
     var filtered = allSections.filter(function(s) {
       return s.startMin>=s0 && s.endMin<=e0 && (keys.length===0 || !s.instructor || activeInstructors[s.instructor]);
@@ -185,8 +185,9 @@
   }
 
   function resetFilters() {
-    targetDoc.getElementById('nf-start').value = 0;
-    targetDoc.getElementById('nf-end').value   = 1440;
+    var s = targetDoc.getElementById('nf-start'), e = targetDoc.getElementById('nf-end');
+    if (s) s.value = 0;
+    if (e) e.value = 1440;
     activeInstructors = {};
     targetDoc.querySelectorAll('.nf-chip').forEach(function(c){
       c.style.background='#fff'; c.style.color='#6c757d'; c.style.borderColor='#e9ecef';
@@ -194,12 +195,16 @@
     applyFilters();
   }
 
-  // ── Render sections ───────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
   function renderSections(secs, total) {
     var el = targetDoc.getElementById('nf-results');
     if (!el) return;
     if (!secs.length) {
-      el.innerHTML = '<p style="text-align:center;color:#6c757d;padding:24px;font-size:13px">No sections found.<br><small>Navigate to an Albert course listing page.</small></p>';
+      el.innerHTML = '<p style="text-align:center;color:#6c757d;padding:24px;font-size:12px">' +
+        (total === 0
+          ? 'Scroll down on the Albert page so all section times are visible, then click <b>Scan</b>.'
+          : 'No sections match the current filters.') +
+        '</p>';
       return;
     }
     var byDay = {};
@@ -232,17 +237,17 @@
     el.innerHTML = html;
   }
 
-  // ── Header stats ──────────────────────────────────────────────────────────
+  // ── Stats / chips ─────────────────────────────────────────────────────────
   function computeStats(sections) {
-    var op=0, wl=0, cl=0, crs={};
-    sections.forEach(function(s) {
+    var op=0,wl=0,cl=0,crs={};
+    sections.forEach(function(s){
       var st=s.status.toLowerCase();
-      if(st.indexOf('wait')>=0) wl++;
-      else if(st.indexOf('closed')>=0||st.indexOf('full')>=0) cl++;
+      if(st.indexOf('wait')>=0)wl++;
+      else if(st.indexOf('closed')>=0||st.indexOf('full')>=0)cl++;
       else op++;
       crs[s.courseCode]=1;
     });
-    return {open:op, waitlist:wl, closed:cl, courses:Object.keys(crs).length};
+    return {open:op,waitlist:wl,closed:cl,courses:Object.keys(crs).length};
   }
 
   function updateHeaderStats() {
@@ -255,9 +260,8 @@
       ' &bull; <span style="color:#fca5a5">'+st.closed+' closed</span>';
   }
 
-  // ── Instructor chips ──────────────────────────────────────────────────────
   function buildChips(sections) {
-    var seen={}, instrs=[];
+    var seen={},instrs=[];
     sections.forEach(function(s){if(s.instructor&&!seen[s.instructor]){seen[s.instructor]=true;instrs.push(s.instructor);}});
     instrs.sort();
     var chipStyle='font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;border:1.5px solid #e9ecef;background:#fff;color:#6c757d;cursor:pointer;display:inline-block;margin:2px;user-select:none;';
@@ -270,57 +274,96 @@
     var container = targetDoc.getElementById('nf-chips');
     if (!container) return;
     var newChips = buildChips(allSections);
-    // Only rebuild if instructor set changed
-    if (container.getAttribute('data-sig') === newChips) return;
-    container.setAttribute('data-sig', newChips);
     container.innerHTML = newChips;
-    // Reset active state (instructor set changed, old active selections are stale)
     activeInstructors = {};
   }
 
-  // ── Build and inject floating panel ──────────────────────────────────────
+  // ── Manual scan ───────────────────────────────────────────────────────────
+  function manualScan() {
+    var btn = targetDoc.getElementById('nf-scan');
+    if (btn) { btn.textContent = 'Scanning…'; btn.disabled = true; }
+    setTimeout(function() {
+      allSections = parse(gatherText(document));
+      updateHeaderStats();
+      rebuildChips();
+      applyFilters();
+      if (btn) { btn.textContent = 'Scan'; btn.disabled = false; }
+    }, 50);
+  }
+
+  // ── Live update (MutationObserver + polling fallback) ─────────────────────
+  var lastFingerprint = '';
+
+  function fingerprint(sections) {
+    return sections.map(function(s){ return s.classNum+':'+s.startMin; }).join('|');
+  }
+
+  function doRefresh() {
+    var newSections = parse(gatherText(document));
+    var fp = fingerprint(newSections);
+    if (fp === lastFingerprint) return;
+    lastFingerprint = fp;
+    allSections = newSections;
+    updateHeaderStats();
+    rebuildChips();
+    applyFilters();
+  }
+
+  var refreshTimer = null;
+  function scheduledRefresh() {
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(doRefresh, 600);
+  }
+
+  function observeIframes() {
+    var frames = document.querySelectorAll('iframe');
+    for (var i = 0; i < frames.length; i++) {
+      try {
+        var iDoc = frames[i].contentDocument;
+        if (!iDoc || !iDoc.body || iDoc.body.__nyuObserved) continue;
+        iDoc.body.__nyuObserved = true;
+        new MutationObserver(scheduledRefresh).observe(iDoc.body, { childList: true, subtree: true });
+      } catch(e) {}
+    }
+  }
+
+  // Watch for new iframes added by PeopleSoft navigation
+  new MutationObserver(function(muts) {
+    var hasNewFrame = muts.some(function(m) {
+      return [].some.call(m.addedNodes, function(n) {
+        return n.nodeName === 'IFRAME' || (n.querySelectorAll && n.querySelectorAll('iframe').length > 0);
+      });
+    });
+    if (hasNewFrame) setTimeout(observeIframes, 500);
+  }).observe(document.body, { childList: true, subtree: true });
+
+  // Polling fallback — catches anything the observer misses
+  setInterval(doRefresh, 2000);
+
+  // ── Build panel ───────────────────────────────────────────────────────────
   function buildPanel() {
     var st = computeStats(allSections);
     var chips = buildChips(allSections);
 
     var panel = targetDoc.createElement('div');
     panel.id = '__nyu-panel';
-    panel.style.cssText = [
-      'position:fixed',
-      'bottom:16px',
-      'right:16px',
-      'width:380px',
-      'z-index:2147483647',
-      'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
-      'font-size:13px',
-      'line-height:1.4',
-      'border-radius:12px',
-      'box-shadow:0 4px 24px rgba(0,0,0,.35)',
-      'overflow:hidden',
-      'display:flex',
-      'flex-direction:column'
-    ].join(';');
+    panel.style.cssText = 'position:fixed;bottom:16px;right:16px;width:380px;z-index:2147483647;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:13px;line-height:1.4;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.35);overflow:hidden;display:flex;flex-direction:column;';
 
     panel.innerHTML = [
-      // Header
       '<div style="background:#57068c;color:#fff;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">',
-        '<div>',
+        '<div style="min-width:0">',
           '<div style="font-size:13px;font-weight:700">NYU Course Organizer</div>',
           '<div id="nf-stats" style="font-size:10px;opacity:.85;margin-top:1px">',
-            allSections.length+' sections &bull; '+st.courses+' course'+(st.courses!==1?'s':'')+
-            ' &bull; <span style="color:#86efac">'+st.open+' open</span>'+
-            ' &bull; <span style="color:#fde68a">'+st.waitlist+' wait</span>'+
-            ' &bull; <span style="color:#fca5a5">'+st.closed+' closed</span>',
+            allSections.length+' sections &bull; '+st.courses+' courses',
           '</div>',
         '</div>',
-        '<div style="display:flex;gap:5px">',
-          '<button id="nf-minimize" style="background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:5px;padding:3px 9px;cursor:pointer;font-size:12px;line-height:1">&#9660;</button>',
+        '<div style="display:flex;gap:5px;flex-shrink:0">',
+          '<button id="nf-scan" style="background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:5px;padding:3px 8px;cursor:pointer;font-size:11px;font-weight:600">Scan</button>',
+          '<button id="nf-minimize" style="background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:5px;padding:3px 9px;cursor:pointer;font-size:12px">&#9660;</button>',
           '<button id="nf-close" style="background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:5px;padding:3px 9px;cursor:pointer;font-size:12px;font-weight:700">&#215;</button>',
         '</div>',
       '</div>',
-      // Body (filter + results — hidden when minimized)
       '<div id="nf-body" style="background:#f8f9fa;display:flex;flex-direction:column;max-height:70vh">',
-        // Filter bar
         '<div style="background:#fff;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid #e9ecef;flex-shrink:0">',
           '<div style="display:flex;align-items:center;gap:4px">',
             '<label style="font-size:9px;font-weight:700;color:#6c757d;text-transform:uppercase;letter-spacing:.3px">From</label>',
@@ -330,20 +373,17 @@
             '<label style="font-size:9px;font-weight:700;color:#6c757d;text-transform:uppercase;letter-spacing:.3px">To</label>',
             '<select id="nf-end" style="border:1.5px solid #e9ecef;border-radius:5px;padding:3px 5px;font-size:11px;color:#343a40">'+timeOptions(1440,'end')+'</select>',
           '</div>',
-          chips ? '<div id="nf-chips" style="display:flex;flex-wrap:wrap;gap:2px;flex:1">'+chips+'</div>' : '<div id="nf-chips" style="display:none"></div>',
+          '<div id="nf-chips" style="display:flex;flex-wrap:wrap;gap:2px;flex:1">'+chips+'</div>',
           '<button id="nf-reset" style="background:none;border:none;color:#adb5bd;cursor:pointer;font-size:10px;font-weight:600;text-decoration:underline;padding:0">Reset</button>',
         '</div>',
-        // Results
         '<div id="nf-results" style="padding:10px 12px;overflow-y:auto;flex:1"></div>',
       '</div>'
     ].join('');
 
     targetDoc.body.appendChild(panel);
 
-    // Wire event listeners
-    targetDoc.getElementById('nf-close').addEventListener('click', function() {
-      panel.style.display = 'none';
-    });
+    targetDoc.getElementById('nf-close').addEventListener('click', function() { panel.style.display = 'none'; });
+    targetDoc.getElementById('nf-scan').addEventListener('click', manualScan);
 
     var minimized = false;
     var minBtn = targetDoc.getElementById('nf-minimize');
@@ -357,8 +397,7 @@
     targetDoc.getElementById('nf-end').addEventListener('change', applyFilters);
     targetDoc.getElementById('nf-reset').addEventListener('click', resetFilters);
 
-    var chipsContainer = targetDoc.getElementById('nf-chips');
-    chipsContainer.addEventListener('click', function(e) {
+    targetDoc.getElementById('nf-chips').addEventListener('click', function(e) {
       if (e.target && e.target.classList.contains('nf-chip')) {
         toggleInstructor(e.target.getAttribute('data-n'));
       }
@@ -368,87 +407,37 @@
       if (e.key === 'Escape') panel.style.display = 'none';
     });
 
-    // Render initial results
-    if (allSections.length) {
-      renderSections(allSections, allSections.length);
-    } else {
-      targetDoc.getElementById('nf-results').innerHTML =
-        '<p style="text-align:center;color:#6c757d;padding:24px;font-size:13px">Navigate to an Albert course listing — panel will update automatically.</p>';
-    }
-  }
-
-  // ── Live update machinery ─────────────────────────────────────────────────
-  var refreshTimer = null;
-
-  function scheduledRefresh() {
-    clearTimeout(refreshTimer);
-    refreshTimer = setTimeout(doRefresh, 600);
-  }
-
-  function observeIframes() {
-    var frames = document.querySelectorAll('iframe');
-    for (var i = 0; i < frames.length; i++) {
-      try {
-        var iDoc = frames[i].contentDocument;
-        if (!iDoc || !iDoc.body) continue;
-        if (iDoc.body.__nyuObserved) continue;
-        iDoc.body.__nyuObserved = true;
-        new MutationObserver(scheduledRefresh).observe(iDoc.body, { childList: true, subtree: true });
-      } catch(e) {}
-    }
-  }
-
-  function doRefresh() {
-    var newSections = parse(gatherText(document));
-    if (newSections.length === allSections.length) return;
-    allSections = newSections;
-    updateHeaderStats();
-    rebuildChips();
     applyFilters();
-    observeIframes();
-    // Auto-show panel when sections first appear
-    var panel = targetDoc.getElementById('__nyu-panel');
-    if (panel && newSections.length > 0 && panel.style.display === 'none') {
-      panel.style.display = '';
-    }
   }
-
-  // Watch top-level document for new iframes injected by PeopleSoft navigation
-  new MutationObserver(function(muts) {
-    var hasNewFrame = muts.some(function(m) {
-      return [].some.call(m.addedNodes, function(n) {
-        return n.nodeName === 'IFRAME' ||
-               (n.querySelectorAll && n.querySelectorAll('iframe').length > 0);
-      });
-    });
-    if (hasNewFrame) setTimeout(observeIframes, 500);
-  }).observe(document.body, { childList: true, subtree: true });
 
   // ── Boot ──────────────────────────────────────────────────────────────────
-  function waitForIframesAndParse(cb) {
-    var frames = document.querySelectorAll('iframe');
-    var pending = 0;
-    for (var i = 0; i < frames.length; i++) {
-      var f = frames[i];
-      try {
-        if (f.contentDocument && f.contentDocument.readyState === 'complete') continue;
-      } catch(e) { continue; }
-      pending++;
-      f.addEventListener('load', function() {
-        if (--pending === 0) cb(parse(gatherText(document)));
-      });
-    }
-    if (pending === 0) cb(parse(gatherText(document)));
-  }
-
-  waitForIframesAndParse(function(sections) {
+  // Wait up to 3s for iframes, then parse whatever is available
+  var booted = false;
+  function boot(sections) {
+    if (booted) return;
+    booted = true;
     allSections = sections;
+    lastFingerprint = fingerprint(sections);
     buildPanel();
     observeIframes();
-    // If no sections on load, hide panel until MutationObserver finds some
-    if (!allSections.length) {
-      targetDoc.getElementById('__nyu-panel').style.display = 'none';
-    }
-  });
+  }
+
+  var frames = document.querySelectorAll('iframe');
+  var pending = 0;
+  for (var fi = 0; fi < frames.length; fi++) {
+    try {
+      if (frames[fi].contentDocument && frames[fi].contentDocument.readyState === 'complete') continue;
+    } catch(e) { continue; }
+    pending++;
+    frames[fi].addEventListener('load', (function() {
+      return function() { if (--pending === 0) boot(parse(gatherText(document))); };
+    })());
+  }
+  if (pending === 0) {
+    boot(parse(gatherText(document)));
+  } else {
+    // Fallback: don't wait forever
+    setTimeout(function() { boot(parse(gatherText(document))); }, 3000);
+  }
 
 })();
